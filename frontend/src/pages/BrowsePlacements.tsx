@@ -72,6 +72,7 @@ const BrowsePlacements = () => {
           resultsLabel={resultsLabel}
           sortOption={sortOption}
           onSortChange={onSortChange}
+          searchValue={searchValue}
         />
         <RightSidebar
           activeTab={activeTab}

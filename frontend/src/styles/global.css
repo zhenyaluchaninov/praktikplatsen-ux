@@ -235,21 +235,59 @@
             margin-bottom: 16px;
         }
 
-        .filter-label {
+        .filter-label-button {
+            width: 100%;
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 8px;
             color: #555;
+            background: transparent;
+            border: none;
+            padding: 4px 0;
+            cursor: pointer;
+            text-align: left;
         }
 
-        .filter-label svg {
+        .filter-label-button:focus-visible {
+            outline: 2px solid rgba(255, 153, 51, 0.4);
+            border-radius: 6px;
+        }
+
+        .filter-label-icon svg {
             width: 16px;
             height: 16px;
             stroke: #FF9933;
             flex-shrink: 0;
+        }
+
+        .filter-label-text {
+            flex: 1;
+        }
+
+        .filter-chevron {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .filter-chevron svg {
+            width: 12px;
+            height: 12px;
+            stroke: #999;
+        }
+
+        .filter-chevron.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .filter-options {
+            margin-left: 28px;
         }
 
         .filter-option {
@@ -313,6 +351,13 @@
             color: #999;
         }
 
+        .search-highlight {
+            background: rgba(255, 153, 51, 0.25);
+            color: inherit;
+            border-radius: 4px;
+            padding: 0 2px;
+        }
+
         .search-box {
             width: 100%;
             padding: 12px;
@@ -357,8 +402,8 @@
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
         }
 
         .placement-card {
@@ -513,6 +558,15 @@
             width: 12px;
             height: 12px;
             flex-shrink: 0;
+        }
+
+        .meta-item.home-area {
+            color: #2a9d6d;
+            font-weight: 600;
+        }
+
+        .meta-item.home-area svg {
+            stroke: #2a9d6d;
         }
 
         .card-footer {

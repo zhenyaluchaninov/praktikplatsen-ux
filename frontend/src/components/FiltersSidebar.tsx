@@ -1,4 +1,4 @@
-﻿import type { MouseEvent, ReactElement } from 'react';
+﻿import { useEffect, useState, type MouseEvent, type ReactElement } from 'react';
 
 import type { FilterGroupId } from '../hooks/usePlacements';
 
@@ -23,7 +23,7 @@ type FiltersSidebarProps = {
   onClearFilters: () => void;
 };
 
-const groupIcons: Record<string, ReactElement> = {
+const groupIcons: Record<FilterGroupId, ReactElement> = {
   industry: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7"></rect>
@@ -54,12 +54,33 @@ const groupIcons: Record<string, ReactElement> = {
   ),
 };
 
-const getGroupIcon = (id: string) => groupIcons[id] ?? groupIcons.industry;
+const getGroupIcon = (id: FilterGroupId) => groupIcons[id] ?? groupIcons.industry;
 
 export const FiltersSidebar = ({ groups, searchValue, onSearchChange, onToggleFilter, onClearFilters }: FiltersSidebarProps) => {
+  const [collapsedGroups, setCollapsedGroups] = useState<Partial<Record<FilterGroupId, boolean>>>({});
+
+  useEffect(() => {
+    setCollapsedGroups((prev) => {
+      const next = { ...prev };
+      groups.forEach((group) => {
+        if (typeof next[group.id] === 'undefined') {
+          next[group.id] = true;
+        }
+      });
+      return next;
+    });
+  }, [groups]);
+
   const handleClear = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     onClearFilters();
+  };
+
+  const toggleGroup = (groupId: FilterGroupId) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
   };
 
   return (
@@ -80,29 +101,44 @@ export const FiltersSidebar = ({ groups, searchValue, onSearchChange, onToggleFi
         onChange={(event) => onSearchChange(event.target.value)}
       />
 
-      {groups.map((group) => (
-        <div className="filter-group" key={group.id}>
-          <label className="filter-label">
-            {getGroupIcon(group.id)}
-            {group.label}
-          </label>
-          {group.options.map((option) => (
-            <div className="filter-option" key={option.id}>
-              <input
-                type="checkbox"
-                id={`${group.id}-${option.id}`}
-                checked={option.checked}
-                onChange={() => onToggleFilter(group.id, option.id)}
-              />
-              <label htmlFor={`${group.id}-${option.id}`}>{option.label}</label>
-              <span className="filter-count">{option.count}</span>
-            </div>
-          ))}
-        </div>
-      ))}
+      {groups.map((group) => {
+        const isCollapsed = collapsedGroups[group.id] ?? true;
+        return (
+          <div className="filter-group" key={group.id}>
+            <button
+              type="button"
+              className="filter-label-button"
+              onClick={() => toggleGroup(group.id)}
+              aria-expanded={!isCollapsed}
+              aria-controls={`filter-options-${group.id}`}
+            >
+              <span className={`filter-chevron ${isCollapsed ? 'collapsed' : ''}`} aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+              <span className="filter-label-icon">{getGroupIcon(group.id)}</span>
+              <span className="filter-label-text">{group.label}</span>
+            </button>
+            {!isCollapsed && (
+              <div className="filter-options" id={`filter-options-${group.id}`}>
+                {group.options.map((option) => (
+                  <div className="filter-option" key={option.id}>
+                    <input
+                      type="checkbox"
+                      id={`${group.id}-${option.id}`}
+                      checked={option.checked}
+                      onChange={() => onToggleFilter(group.id, option.id)}
+                    />
+                    <label htmlFor={`${group.id}-${option.id}`}>{option.label}</label>
+                    <span className="filter-count">{option.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </aside>
   );
 };
-
-
-

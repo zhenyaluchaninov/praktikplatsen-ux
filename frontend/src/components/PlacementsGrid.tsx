@@ -1,4 +1,4 @@
-import type { ChangeEvent, MouseEvent } from 'react';
+﻿import type { ChangeEvent, MouseEvent, ReactNode } from 'react';
 
 import type { SortOption } from '../hooks/usePlacements';
 import type { Placement } from '../types/placement';
@@ -11,7 +11,34 @@ interface PlacementsGridProps {
   resultsLabel: string;
   sortOption: SortOption;
   onSortChange: (option: SortOption) => void;
+  searchValue: string;
 }
+
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const highlightMatch = (text: string, query: string): ReactNode => {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return text;
+  }
+
+  const regex = new RegExp(`(${escapeRegExp(trimmed)})`, 'ig');
+  const parts = text.split(regex);
+
+  if (parts.length === 1) {
+    return text;
+  }
+
+  return parts.map((part, index) =>
+    index % 2 === 1 ? (
+      <mark key={`${part}-${index}`} className="search-highlight">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+};
 
 export const PlacementsGrid = ({
   placements,
@@ -21,6 +48,7 @@ export const PlacementsGrid = ({
   resultsLabel,
   sortOption,
   onSortChange,
+  searchValue,
 }: PlacementsGridProps) => {
   const handleCardClick = (id: number) => (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
@@ -44,7 +72,7 @@ export const PlacementsGrid = ({
           <option value="recommended">Recommended</option>
           <option value="newest">Newest First</option>
           <option value="available">Most Available</option>
-          <option value="alphabetical">Alphabetical (A–Z)</option>
+          <option value="alphabetical">Alphabetical (A-Z)</option>
           <option value="homeArea">Home Area First</option>
         </select>
       </div>
@@ -57,8 +85,8 @@ export const PlacementsGrid = ({
               <div className="card-header">
                 <div className="company-logo">{placement.logo}</div>
                 <div className="card-content">
-                  <div className="card-title">{placement.title}</div>
-                  <div className="card-company">{placement.company}</div>
+                  <div className="card-title">{highlightMatch(placement.title, searchValue)}</div>
+                  <div className="card-company">{highlightMatch(placement.company, searchValue)}</div>
                 </div>
                 <div className="card-actions">
                   <button
@@ -116,7 +144,7 @@ export const PlacementsGrid = ({
                   {placement.spots}/{placement.totalSpots} spots
                 </div>
                 {placement.homeArea && (
-                  <div className="meta-item">
+                  <div className="meta-item home-area">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -128,7 +156,7 @@ export const PlacementsGrid = ({
                       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                       <polyline points="9 22 9 12 15 12 15 22"></polyline>
                     </svg>
-                    Your area
+                    <span>Your area</span>
                   </div>
                 )}
               </div>
