@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PraktikPlatsen Redesign - UX Concept</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-tab {
+            padding: 4px 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: #666;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            border-radius: 1px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-tab:hover {
+            color: #333;
+        }
+
+        .nav-tab.active {
+            color: #FF9933;
+            border-bottom-color: #FF9933;
+            font-weight: 600;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo span:first-child {
+            color: #333;
+        }
+
+        .logo span:last-child {
+            color: #FF9933;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #FF9933;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 57px;
+            z-index: 90;
+        }
+
+        .progress-content {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-count {
+            font-weight: 700;
+            color: #FF9933;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9933, #FFB366);
+            transition: width 0.3s ease;
+        }
+
+        .progress-requirements {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .requirement-met {
+            color: #4CAF50;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            padding-left: 328px;
+            padding-right: 408px;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 1648px) {
+            .main-container {
+                padding-left: 328px;
+                padding-right: 408px;
+            }
+        }
+
+        /* Filters Sidebar */
+        .filters-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 280px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: fixed;
+            top: 147px;
+            left: calc((100vw - 1600px) / 2 + 24px);
+            max-height: calc(100vh - 167px);
+            overflow-y: auto;
+            z-index: 85;
+        }
+
+        @media (max-width: 1648px) {
+            .filters-sidebar {
+                left: 24px;
+            }
+        }
+
+        /* Cards Section */
+        .cards-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .clear-filters {
+            color: #FF9933;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .clear-filters:hover {
+            text-decoration: underline;
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+        }
+
+        .filter-label svg {
+            width: 16px;
+            height: 16px;
+            stroke: #FF9933;
+            flex-shrink: 0;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .filter-option:hover {
+            background-color: #f8f8f8;
+        }
+
+        .filter-option input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .filter-option input[type="checkbox"]:hover {
+            border-color: #FF9933;
+        }
+
+        .filter-option input[type="checkbox"]:checked {
+            background-color: #FF9933;
+            border-color: #FF9933;
+        }
+
+        .filter-option input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .filter-option label {
+            font-size: 14px;
+            cursor: pointer;
+            flex: 1;
+            user-select: none;
+        }
+
+        .filter-count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #FF9933;
+        }
+
+        /* Cards Grid */
+        .cards-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .results-count {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .sort-dropdown {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+
+        .placement-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .placement-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .company-logo {
+            width: 34px;
+            height: 34px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #666;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .icon-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .icon-btn .heart-icon {
+            color: #d0d0d0;
+            transition: color 0.2s;
+        }
+
+        .icon-btn.favorited .heart-icon {
+            color: #FF9933;
+        }
+
+        .card-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-new {
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .badge-group {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+
+        .badge-almost-full {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .badge-home {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .card-company {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .meta-item svg {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+
+        .card-footer {
+            display: flex;
+            gap: 6px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 8px;
+        }
+
+        .btn-apply {
+            flex: 1;
+            padding: 10px 16px;
+            background: #FF9933;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-apply:hover {
+            background: #FF6624;
+        }
+
+        .btn-apply:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-details {
+            flex: 1;
+            padding: 6px 10px;
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+        }
+
+        .btn-details:hover {
+            background: #f8f8f8;
+            border-color: #999;
+            color: #333;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            width: 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: fixed;
+            top: 147px;
+            right: calc((100vw - 1600px) / 2 + 24px);
+            width: 360px;
+            max-height: calc(100vh - 167px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 85;
+        }
+
+        @media (max-width: 1648px) {
+            .sidebar-card {
+                right: 24px;
+            }
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #FF9933;
+            border-bottom-color: #FF9933;
+        }
+
+        .tab-count {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 2px 6px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .tab.active .tab-count {
+            background: #FFE5CC;
+            color: #FF9933;
+        }
+
+        .tab-content {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .saved-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            padding-right: 4px;
+        }
+
+        .saved-item {
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .saved-item:hover {
+            background: #f0f0f0;
+        }
+
+        .saved-item.selected {
+            background: #FFF9F0;
+            border: 1px solid #FFE5CC;
+        }
+
+        .saved-item-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid #d0d0d0;
+            border-radius: 4px;
+            background: white;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .saved-item-checkbox:hover {
+            border-color: #FF9933;
+        }
+
+        .saved-item-checkbox:checked {
+            background: #FF9933;
+            border-color: #FF9933;
+        }
+
+        .saved-item-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .saved-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .saved-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .saved-item-company {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .saved-item-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .btn-submit-all {
+            width: 100%;
+            padding: 14px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-submit-all:hover {
+            background: #45a049;
+        }
+
+        .btn-submit-all:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Notifications */
+        .notification-toast {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 24px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Loading */
+        .loading-more {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr 360px;
+            }
+
+            .filters-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 16px;
+            }
+
+            .right-sidebar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 16px 16px 0 0;
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+                max-height: 60vh;
+                overflow-y: auto;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-nav">
+                <div class="logo">
+                    <span>praktik</span><span>platsen</span><span>.se</span>
+                </div>
+                <nav class="nav-tabs">
+                    <a href="#" class="nav-tab active">Browse Placements</a>
+                    <a href="#" class="nav-tab">History</a>
+                </nav>
+            </div>
+            <div class="user-info">
+                <div class="notification-bell" onclick="toggleNotifications()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge">2</span>
+                </div>
+                <div class="user-name">Emma S.</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Section -->
+    <div class="progress-section">
+        <div class="progress-content">
+            <div class="progress-header">
+                <div class="progress-text">
+                    Your Applications: <span class="progress-count" id="progressCount">3/10</span>
+                </div>
+                <div class="progress-text">
+                    Week: 34-37, 2025
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 30%"></div>
+            </div>
+            <div class="progress-requirements">
+                ✓ <span class="requirement-met">Minimum 3 in your home municipality met (3/3)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Filters Sidebar -->
+        <aside class="filters-sidebar">
+            <div class="filters-header">
+                <h2 class="filters-title">Filters</h2>
+                <a href="#" class="clear-filters" onclick="clearFilters(); return false;">Clear all</a>
+            </div>
+
+            <input type="text" class="search-box" placeholder="Search by name, company..." id="searchInput">
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Industry
+                </label>
+                <div class="filter-option">
+                    <input type="checkbox" id="cafe" onchange="applyFilters()">
+                    <label for="cafe">Café & Restaurants</label>
+                    <span class="filter-count">24</span>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="retail" onchange="applyFilters()">
+                    <label for="retail">Retail & Fashion</label>
+                    <span class="filter-count">18</span>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="tech" onchange="applyFilters()">
+                    <label for="tech">Tech & IT</label>
+                    <span class="filter-count">12</span>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="healthcare" onchange="applyFilters()">
+                    <label for="healthcare">Healthcare</label>
+                    <span class="filter-count">15</span>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="media" onchange="applyFilters()">
+                    <label for="media">Media & Design</label>
+                    <span class="filter-count">9</span>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Location
+                </label>
+                <div class="filter-option">
+                    <input type="checkbox" id="home" onchange="applyFilters()">
+                    <label for="home">Your Home Area (Angered)</label>
+                    <span class="filter-count">32</span>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="nearby" onchange="applyFilters()">
+                    <label for="nearby">Nearby Areas</label>
+                    <span class="filter-count">45</span>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    Type
+                </label>
+                <div class="filter-option">
+                    <input type="checkbox" id="group" onchange="applyFilters()">
+                    <label for="group">Group PRAO</label>
+                    <span class="filter-count">8</span>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="new" onchange="applyFilters()">
+                    <label for="new">New This Week</label>
+                    <span class="filter-count">5</span>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Availability
+                </label>
+                <div class="filter-option">
+                    <input type="checkbox" id="available" onchange="applyFilters()">
+                    <label for="available">Spots Available</label>
+                    <span class="filter-count">54</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Cards Section -->
+        <main class="cards-section">
+            <div class="results-header">
+                <div class="results-count" id="resultsCount">Showing 54 placements</div>
+                <select class="sort-dropdown" onchange="sortResults(this.value)">
+                    <option value="recommended">Recommended</option>
+                    <option value="new">Newest First</option>
+                    <option value="distance">Closest First</option>
+                    <option value="popular">Most Popular</option>
+                </select>
+            </div>
+
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Cards will be generated by JavaScript -->
+            </div>
+
+            <div class="loading-more" id="loadingMore" style="display: none;">
+                Loading more placements...
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-tabs">
+                    <button class="tab active" onclick="switchTab('favorites')">
+                        Favorites
+                        <span class="tab-count" id="favoritesCount">5</span>
+                    </button>
+                    <button class="tab" onclick="switchTab('applications')">
+                        Applied
+                        <span class="tab-count" id="applicationsCount">3</span>
+                    </button>
+                </div>
+
+                <div id="favoritesTab" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <span style="font-size: 13px; color: #666; font-weight: 600;">Select placements to apply:</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="selectAllFavorites()" style="background: none; border: none; color: #FF9933; font-size: 12px; cursor: pointer; padding: 4px 8px;">Select All</button>
+                            <button onclick="deselectAllFavorites()" style="background: none; border: none; color: #999; font-size: 12px; cursor: pointer; padding: 4px 8px;">Clear</button>
+                        </div>
+                    </div>
+                    <div class="saved-list" id="favoritesList">
+                        <!-- Favorites will be populated here -->
+                    </div>
+                    <button class="btn-submit-all" onclick="applyToAll()" id="applyAllBtn">
+                        Apply to Selected (5)
+                    </button>
+                </div>
+
+                <div id="applicationsTab" class="tab-content" style="display: none;">
+                    <div class="saved-list" id="applicationsList">
+                        <!-- Applications will be populated here -->
+                    </div>
+                    <div style="margin-top: 16px; padding: 12px; background: #E8F5E9; border-radius: 8px; font-size: 13px; color: #2E7D32;">
+                        ℹ️ Your applications are being reviewed. You'll be notified of any updates.
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // Mock data
+        const placements = [
+            {
+                id: 1,
+                title: "Barista & Customer Service",
+                company: "Espresso House",
+                logo: "EH",
+                location: "Angered, Göteborg",
+                spots: 2,
+                totalSpots: 2,
+                distance: "0.8 km",
+                industry: "cafe",
+                homeArea: true,
+                isNew: true,
+                isGroup: false
+            },
+            {
+                id: 2,
+                title: "Elderly Care Assistant",
+                company: "Angered Care Center",
+                logo: "AC",
+                location: "Angered, Göteborg",
+                spots: 1,
+                totalSpots: 3,
+                distance: "1.2 km",
+                industry: "healthcare",
+                homeArea: true,
+                isNew: false,
+                isGroup: true
+            },
+            {
+                id: 3,
+                title: "Retail Sales & Inventory",
+                company: "H&M Angered",
+                logo: "HM",
+                location: "Angered, Göteborg",
+                spots: 1,
+                totalSpots: 2,
+                distance: "0.5 km",
+                industry: "retail",
+                homeArea: true,
+                isNew: false,
+                isGroup: false
+            },
+            {
+                id: 4,
+                title: "Junior Web Developer",
+                company: "Digital Dreams AB",
+                logo: "DD",
+                location: "Västra Hisingen, Göteborg",
+                spots: 2,
+                totalSpots: 2,
+                distance: "3.4 km",
+                industry: "tech",
+                homeArea: false,
+                isNew: true,
+                isGroup: false
+            },
+            {
+                id: 5,
+                title: "Kitchen & Food Prep",
+                company: "Max Burgers",
+                logo: "MB",
+                location: "Angered, Göteborg",
+                spots: 3,
+                totalSpots: 4,
+                distance: "1.8 km",
+                industry: "cafe",
+                homeArea: true,
+                isNew: false,
+                isGroup: true
+            },
+            {
+                id: 6,
+                title: "Pharmacy Assistant",
+                company: "Apoteket Hjärtat",
+                logo: "AH",
+                location: "Lundby, Göteborg",
+                spots: 1,
+                totalSpots: 1,
+                distance: "4.2 km",
+                industry: "healthcare",
+                homeArea: false,
+                isNew: false,
+                isGroup: false
+            },
+            {
+                id: 7,
+                title: "Social Media Intern",
+                company: "Creative Studio",
+                logo: "CS",
+                location: "Angered, Göteborg",
+                spots: 2,
+                totalSpots: 2,
+                distance: "0.9 km",
+                industry: "media",
+                homeArea: true,
+                isNew: true,
+                isGroup: false
+            },
+            {
+                id: 8,
+                title: "Warehouse & Logistics",
+                company: "PostNord",
+                logo: "PN",
+                location: "Angered, Göteborg",
+                spots: 4,
+                totalSpots: 5,
+                distance: "1.5 km",
+                industry: "retail",
+                homeArea: true,
+                isNew: false,
+                isGroup: true
+            }
+        ];
+
+        let favorites = [1, 3, 4, 7, 8];
+        let applications = [2, 5, 6];
+        let selectedFavorites = []; // Empty by default - user must check boxes
+
+        function renderCards() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+
+            placements.forEach(placement => {
+                const isFavorited = favorites.includes(placement.id);
+                const isApplied = applications.includes(placement.id);
+
+                const card = document.createElement('div');
+                card.className = 'placement-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="company-logo">${placement.logo}</div>
+                        <div class="card-content">
+                            <div class="card-title">${placement.title}</div>
+                            <div class="card-company">${placement.company}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="icon-btn ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(${placement.id}); event.stopPropagation();" title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
+                                <svg class="heart-icon" viewBox="0 0 24 24" fill="${isFavorited ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-meta">
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            ${placement.location}
+                        </div>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            ${placement.spots}/${placement.totalSpots} spots
+                        </div>
+                        ${placement.homeArea ? `
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            Your area
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-details" onclick="showDetails(${placement.id}); event.stopPropagation();">
+                            <svg style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            Details
+                        </button>
+                    </div>
+                `;
+                
+                card.onclick = (e) => {
+                    if (!e.target.closest('button')) {
+                        showDetails(placement.id);
+                    }
+                };
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function renderSidebarLists() {
+            // Favorites
+            const favoritesList = document.getElementById('favoritesList');
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </div>
+                        <p>No favorites yet</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Click the heart icon on placements to save them here</p>
+                    </div>
+                `;
+            } else {
+                favoritesList.innerHTML = favorites.map(id => {
+                    const placement = placements.find(p => p.id === id);
+                    const isSelected = selectedFavorites.includes(id);
+                    return `
+                        <div class="saved-item ${isSelected ? 'selected' : ''}">
+                            <input type="checkbox" class="saved-item-checkbox" ${isSelected ? 'checked' : ''} 
+                                   onchange="toggleFavoriteSelection(${id})" id="fav-${id}">
+                            <label for="fav-${id}" class="saved-item-info" style="cursor: pointer;">
+                                <div class="saved-item-title">${placement.title}</div>
+                                <div class="saved-item-company">${placement.company}</div>
+                            </label>
+                            <div class="saved-item-actions">
+                                <button class="icon-btn" onclick="removeFavorite(${id})" title="Remove from favorites">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Applications
+            const applicationsList = document.getElementById('applicationsList');
+            if (applications.length === 0) {
+                applicationsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <p>No applications yet</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Select favorites and click "Apply to Selected"</p>
+                    </div>
+                `;
+            } else {
+                applicationsList.innerHTML = applications.map(id => {
+                    const placement = placements.find(p => p.id === id);
+                    return `
+                        <div class="saved-item">
+                            <div class="saved-item-info">
+                                <div class="saved-item-title">${placement.title}</div>
+                                <div class="saved-item-company">${placement.company}</div>
+                            </div>
+                            <div class="saved-item-actions">
+                                <button class="icon-btn" onclick="event.stopPropagation(); withdrawApplication(${id});" title="Withdraw application">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Update counts
+            document.getElementById('favoritesCount').textContent = favorites.length;
+            document.getElementById('applicationsCount').textContent = applications.length;
+            
+            // Update apply button
+            const selectedCount = selectedFavorites.length;
+            const applyBtn = document.getElementById('applyAllBtn');
+            applyBtn.textContent = `Apply to Selected (${selectedCount})`;
+            applyBtn.disabled = selectedCount === 0 || applications.length >= 10;
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const count = applications.length;
+            document.getElementById('progressCount').textContent = `${count}/10`;
+            document.getElementById('progressFill').style.width = `${(count / 10) * 100}%`;
+        }
+
+        function toggleFavorite(id) {
+            if (favorites.includes(id)) {
+                favorites = favorites.filter(fav => fav !== id);
+                selectedFavorites = selectedFavorites.filter(fav => fav !== id);
+                showNotification('Removed from favorites', '');
+            } else {
+                favorites.push(id);
+                // Don't auto-select when adding to favorites
+                showNotification('Added to favorites', 'Check the box to select it for application');
+            }
+            renderCards();
+            renderSidebarLists();
+        }
+
+        function toggleFavoriteSelection(id) {
+            if (selectedFavorites.includes(id)) {
+                selectedFavorites = selectedFavorites.filter(fav => fav !== id);
+            } else {
+                selectedFavorites.push(id);
+            }
+            renderSidebarLists();
+        }
+
+        function removeFavorite(id) {
+            favorites = favorites.filter(fav => fav !== id);
+            selectedFavorites = selectedFavorites.filter(fav => fav !== id);
+            showNotification('Removed from favorites', '');
+            renderCards();
+            renderSidebarLists();
+        }
+
+        function withdrawApplication(id) {
+            if (confirm('Are you sure you want to withdraw this application?')) {
+                applications = applications.filter(app => app !== id);
+                showNotification('Application withdrawn', 'You can apply again if needed');
+                renderCards();
+                renderSidebarLists();
+            }
+        }
+
+        function applyToPlacement(id) {
+            if (applications.length >= 10) {
+                showNotification('Application limit reached', 'You can only apply to 10 placements');
+                return;
+            }
+            if (!applications.includes(id)) {
+                applications.push(id);
+                favorites = favorites.filter(fav => fav !== id);
+                selectedFavorites = selectedFavorites.filter(fav => fav !== id);
+                showNotification('Application submitted!', 'You will be notified when reviewed');
+                renderCards();
+                renderSidebarLists();
+            }
+        }
+
+        function applyToAll() {
+            const remainingSlots = 10 - applications.length;
+            if (remainingSlots === 0) {
+                showNotification('Application limit reached', 'You can only apply to 10 placements');
+                return;
+            }
+
+            if (selectedFavorites.length === 0) {
+                showNotification('No favorites selected', 'Check the boxes to select favorites');
+                return;
+            }
+
+            const toApply = selectedFavorites.slice(0, remainingSlots);
+            applications.push(...toApply);
+            favorites = favorites.filter(id => !toApply.includes(id));
+            selectedFavorites = selectedFavorites.filter(id => !toApply.includes(id));
+            
+            showNotification(`Applied to ${toApply.length} placements!`, 'Check "Applied" tab to see them');
+            renderCards();
+            renderSidebarLists();
+        }
+
+        function selectAllFavorites() {
+            selectedFavorites = [...favorites];
+            renderSidebarLists();
+        }
+
+        function deselectAllFavorites() {
+            selectedFavorites = [];
+            renderSidebarLists();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('favoritesTab').style.display = tab === 'favorites' ? 'block' : 'none';
+            document.getElementById('applicationsTab').style.display = tab === 'applications' ? 'block' : 'none';
+        }
+
+        function showNotification(title, message) {
+            const existing = document.querySelector('.notification-toast');
+            if (existing) existing.remove();
+
+            const notification = document.createElement('div');
+            notification.className = 'notification-toast';
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function showDetails(id) {
+            alert(`This would open a modal with full details for placement #${id}`);
+        }
+
+        function clearFilters() {
+            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            applyFilters();
+        }
+
+        function applyFilters() {
+            // In real implementation, this would filter the cards
+            console.log('Filters applied');
+        }
+
+        function sortResults(value) {
+            console.log('Sorting by:', value);
+        }
+
+        function toggleNotifications() {
+            alert('Notifications panel would open here');
+        }
+
+        // Initialize
+        renderCards();
+        renderSidebarLists();
+
+        // Simulate infinite scroll
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                // Load more would trigger here
+            }
+        });
+    </script>
+</body>
+</html>
