@@ -1,5 +1,6 @@
 import type { ChangeEvent, MouseEvent } from 'react';
 
+import type { SortOption } from '../hooks/usePlacements';
 import type { Placement } from '../types/placement';
 
 interface PlacementsGridProps {
@@ -8,6 +9,8 @@ interface PlacementsGridProps {
   onToggleFavorite: (id: number) => void;
   onShowDetails: (id: number) => void;
   resultsLabel: string;
+  sortOption: SortOption;
+  onSortChange: (option: SortOption) => void;
 }
 
 export const PlacementsGrid = ({
@@ -16,6 +19,8 @@ export const PlacementsGrid = ({
   onToggleFavorite,
   onShowDetails,
   resultsLabel,
+  sortOption,
+  onSortChange,
 }: PlacementsGridProps) => {
   const handleCardClick = (id: number) => (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
@@ -26,7 +31,7 @@ export const PlacementsGrid = ({
   };
 
   const handleSortChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    console.log('Sorting by:', event.target.value);
+    onSortChange(event.target.value as SortOption);
   };
 
   return (
@@ -35,11 +40,12 @@ export const PlacementsGrid = ({
         <div className="results-count" id="resultsCount">
           {resultsLabel}
         </div>
-        <select className="sort-dropdown" onChange={handleSortChange}>
+        <select className="sort-dropdown" value={sortOption} onChange={handleSortChange}>
           <option value="recommended">Recommended</option>
-          <option value="new">Newest First</option>
-          <option value="distance">Closest First</option>
-          <option value="popular">Most Popular</option>
+          <option value="newest">Newest First</option>
+          <option value="available">Most Available</option>
+          <option value="alphabetical">Alphabetical (A–Z)</option>
+          <option value="homeArea">Home Area First</option>
         </select>
       </div>
 

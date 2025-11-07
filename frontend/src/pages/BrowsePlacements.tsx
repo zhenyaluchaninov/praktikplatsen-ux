@@ -34,6 +34,13 @@ const BrowsePlacements = () => {
     applicationsCount,
     applyButtonLabel,
     applyButtonDisabled,
+    filterGroups,
+    searchValue,
+    onSearchChange,
+    onToggleFilter,
+    onClearFilters,
+    sortOption,
+    onSortChange,
   } = usePlacements();
 
   const handleNotificationsClick = () => {
@@ -50,13 +57,21 @@ const BrowsePlacements = () => {
         requirementText={progress.requirement}
       />
       <div className="main-container">
-        <FiltersSidebar />
+        <FiltersSidebar
+          groups={filterGroups}
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
+          onToggleFilter={onToggleFilter}
+          onClearFilters={onClearFilters}
+        />
         <PlacementsGrid
           placements={placements}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           onShowDetails={openModal}
           resultsLabel={resultsLabel}
+          sortOption={sortOption}
+          onSortChange={onSortChange}
         />
         <RightSidebar
           activeTab={activeTab}
