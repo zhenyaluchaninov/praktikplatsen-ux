@@ -1,18 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 
 import type { SortOption } from '../hooks/usePlacements';
 import type { Placement } from '../types/placement';
-
-const SORT_OPTION_LABELS: Record<SortOption, string> = {
-  recommended: 'Recommended',
-  newest: 'Newest First',
-  available: 'Most Available',
-  alphabetical: 'Alphabetical (A-Z)',
-  homeArea: 'Home Area First',
-};
-
-const SORT_OPTIONS: SortOption[] = ['recommended', 'newest', 'available', 'alphabetical', 'homeArea'];
+import { SortControl } from './SortControl';
 
 interface PlacementsGridProps {
   placements: Placement[];
@@ -61,9 +51,6 @@ export const PlacementsGrid = ({
   onSortChange,
   searchValue,
 }: PlacementsGridProps) => {
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const sortRef = useRef<HTMLDivElement>(null);
-
   const handleCardClick = (id: number) => (event: ReactMouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     if (target.closest('button')) {
@@ -72,63 +59,13 @@ export const PlacementsGrid = ({
     onShowDetails(id);
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!sortRef.current?.contains(event.target as Node)) {
-        setIsSortOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleSortSelect = (value: SortOption) => {
-    onSortChange(value);
-    setIsSortOpen(false);
-  };
-
   return (
     <main className="cards-section">
       <div className="results-header">
         <div className="results-count" id="resultsCount">
           {resultsLabel}
         </div>
-        <div className="sort-control" ref={sortRef}>
-          <button
-            type="button"
-            className={`sort-trigger ${isSortOpen ? 'open' : ''}`}
-            onClick={() => setIsSortOpen((prev) => !prev)}
-            aria-haspopup="listbox"
-            aria-expanded={isSortOpen}
-          >
-            <span className="sort-trigger-text">Sort by {SORT_OPTION_LABELS[sortOption] ?? 'Recommended'}</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-          {isSortOpen && (
-            <div className="sort-menu" role="listbox">
-              {SORT_OPTIONS.map((option) => (
-                <button
-                  type="button"
-                  key={option}
-                  className={`sort-option ${sortOption === option ? 'active' : ''}`}
-                  onClick={() => handleSortSelect(option)}
-                  role="option"
-                  aria-selected={sortOption === option}
-                >
-                  <span className="sort-option-indicator" aria-hidden="true">
-                    <span className="sort-option-indicator-dot" />
-                  </span>
-                  <span className="sort-option-label">{SORT_OPTION_LABELS[option]}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <SortControl sortOption={sortOption} onSortChange={onSortChange} />
       </div>
 
       <div className="cards-grid" id="cardsGrid">

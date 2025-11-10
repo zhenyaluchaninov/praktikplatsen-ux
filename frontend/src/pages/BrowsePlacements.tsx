@@ -1,10 +1,15 @@
-import { Header } from '../components/Header';
-import { ProgressBar } from '../components/ProgressBar';
+import { useEffect, useMemo, useState } from 'react';
+
+import { BottomSheet } from '../components/BottomSheet';
+import { FiltersModal } from '../components/FiltersModal';
 import { FiltersSidebar } from '../components/FiltersSidebar';
-import { PlacementsGrid } from '../components/PlacementsGrid';
-import { RightSidebar } from '../components/RightSidebar';
-import { NotificationToast } from '../components/NotificationToast';
+import { Header } from '../components/Header';
 import { ModalPlacementDetails } from '../components/ModalPlacementDetails';
+import { NotificationToast } from '../components/NotificationToast';
+import { PlacementsGrid } from '../components/PlacementsGrid';
+import { ProgressBar } from '../components/ProgressBar';
+import { RightSidebar } from '../components/RightSidebar';
+import { SortControl } from '../components/SortControl';
 import { usePlacements } from '../hooks/usePlacements';
 
 const BrowsePlacements = () => {
@@ -44,22 +49,79 @@ const BrowsePlacements = () => {
     onSortChange,
   } = usePlacements();
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const updateMatch = () => setIsMobile(mediaQuery.matches);
+    updateMatch();
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updateMatch);
+      return () => mediaQuery.removeEventListener('change', updateMatch);
+    }
+    mediaQuery.addListener(updateMatch);
+    return () => mediaQuery.removeListener(updateMatch);
+  }, []);
+
+  useEffect(() => {
+    const threshold = 40;
+    const handleScroll = () => {
+      const shouldHide = window.scrollY > threshold;
+      setHeaderHidden(shouldHide);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('header-collapsed', headerHidden);
+    return () => {
+      document.body.classList.remove('header-collapsed');
+    };
+  }, [headerHidden]);
+
+  const activeFiltersCount = useMemo(
+    () =>
+      filterGroups.reduce(
+        (count, group) => count + group.options.reduce((groupCount, option) => groupCount + (option.checked ? 1 : 0), 0),
+        0,
+      ),
+    [filterGroups],
+  );
+
+  const openFilters = () => setFiltersOpen(true);
+  const closeFilters = () => setFiltersOpen(false);
+
   return (
     <>
-      <Header />
+      <Header hidden={headerHidden} />
       <ProgressBar
         countText={progress.count}
         percentage={progress.percentage}
         weekLabel={progress.week}
       />
+      {isMobile && (
+        <div className={`mobile-toolbar ${headerHidden ? 'mobile-toolbar--pinned' : ''}`}>
+          <button type="button" className="mobile-toolbar__filter" onClick={openFilters}>
+            Filters
+            {activeFiltersCount > 0 && <span className="mobile-toolbar__badge">{activeFiltersCount}</span>}
+          </button>
+          <SortControl sortOption={sortOption} onSortChange={onSortChange} triggerLabel="Sort" className="mobile-toolbar__sort" />
+        </div>
+      )}
       <div className="main-container">
-        <FiltersSidebar
-          groups={filterGroups}
-          searchValue={searchValue}
-          onSearchChange={onSearchChange}
-          onToggleFilter={onToggleFilter}
-          onClearFilters={onClearFilters}
-        />
+        {!isMobile && (
+          <FiltersSidebar
+            groups={filterGroups}
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            onToggleFilter={onToggleFilter}
+            onClearFilters={onClearFilters}
+          />
+        )}
         <PlacementsGrid
           placements={placements}
           favorites={favorites}
@@ -70,29 +132,59 @@ const BrowsePlacements = () => {
           onSortChange={onSortChange}
           searchValue={searchValue}
         />
-        <RightSidebar
-          activeTab={activeTab}
-          favoritesCount={favoritesCount}
-          applicationsCount={applicationsCount}
-          favoritePlacements={favoritePlacements}
-          appliedPlacements={appliedPlacements}
-          selectedFavorites={selectedFavorites}
-          onTabChange={setActiveTab}
-          onToggleFavoriteSelection={toggleFavoriteSelection}
-          onSelectAllFavorites={selectAllFavorites}
-          onDeselectAllFavorites={deselectAllFavorites}
-          onRemoveFavorite={removeFavorite}
-          onApplyToSelected={applyToSelected}
-          onWithdrawApplication={withdrawApplication}
-          applyButtonLabel={applyButtonLabel}
-          applyButtonDisabled={applyButtonDisabled}
-          homeRequirement={homeRequirement}
-        />
+        {!isMobile && (
+          <RightSidebar
+            activeTab={activeTab}
+            favoritesCount={favoritesCount}
+            applicationsCount={applicationsCount}
+            favoritePlacements={favoritePlacements}
+            appliedPlacements={appliedPlacements}
+            selectedFavorites={selectedFavorites}
+            onTabChange={setActiveTab}
+            onToggleFavoriteSelection={toggleFavoriteSelection}
+            onSelectAllFavorites={selectAllFavorites}
+            onDeselectAllFavorites={deselectAllFavorites}
+            onRemoveFavorite={removeFavorite}
+            onApplyToSelected={applyToSelected}
+            onWithdrawApplication={withdrawApplication}
+            applyButtonLabel={applyButtonLabel}
+            applyButtonDisabled={applyButtonDisabled}
+            homeRequirement={homeRequirement}
+          />
+        )}
       </div>
       {notification && (
         <NotificationToast title={notification.title} message={notification.message} onClose={clearNotification} />
       )}
       {modalPlacement && <ModalPlacementDetails placement={modalPlacement} onClose={closeModal} />}
+      <FiltersModal
+        open={filtersOpen}
+        onClose={closeFilters}
+        groups={filterGroups}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        onToggleFilter={onToggleFilter}
+        onClearFilters={onClearFilters}
+      />
+      <BottomSheet
+        enabled={isMobile}
+        activeTab={activeTab}
+        favoritesCount={favoritesCount}
+        applicationsCount={applicationsCount}
+        favoritePlacements={favoritePlacements}
+        appliedPlacements={appliedPlacements}
+        selectedFavorites={selectedFavorites}
+        onTabChange={setActiveTab}
+        onToggleFavoriteSelection={toggleFavoriteSelection}
+        onSelectAllFavorites={selectAllFavorites}
+        onDeselectAllFavorites={deselectAllFavorites}
+        onRemoveFavorite={removeFavorite}
+        onApplyToSelected={applyToSelected}
+        onWithdrawApplication={withdrawApplication}
+        applyButtonLabel={applyButtonLabel}
+        applyButtonDisabled={applyButtonDisabled}
+        homeRequirement={homeRequirement}
+      />
     </>
   );
 };

@@ -1,25 +1,60 @@
-export const Header = () => (
-  <header className="header">
-    <div className="header-content">
-      <div className="header-nav">
-        <div className="logo">
-          <span>praktik</span>
-          <span>platsen</span>
-          <span>.se</span>
+import { useState } from 'react';
+
+import { MobileMenu } from './MobileMenu';
+
+type HeaderProps = {
+  hidden?: boolean;
+};
+
+const navItems = [
+  { label: 'Browse Placements', href: '#browse', active: true },
+  { label: 'History', href: '#history', active: false },
+];
+
+export const Header = ({ hidden = false }: HeaderProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <header className={`header ${hidden ? 'header--hidden' : ''}`.trim()}>
+      <div className="header-content">
+        <div className="header-nav">
+          <div className="logo">
+            <span>praktik</span>
+            <span>platsen</span>
+            <span>.se</span>
+          </div>
+          <nav className="nav-tabs">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`nav-tab ${item.active ? 'active' : ''}`}
+                onClick={(event) => event.preventDefault()}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </div>
-        <nav className="nav-tabs">
-          <a href="#browse" className="nav-tab active" onClick={(event) => event.preventDefault()}>
-            Browse Placements
-          </a>
-          <a href="#history" className="nav-tab" onClick={(event) => event.preventDefault()}>
-            History
-          </a>
-        </nav>
+        <div className="header-actions">
+          <div className="user-info">
+            <div className="user-name">Emma S.</div>
+          </div>
+          <button
+            type="button"
+            className="burger-btn"
+            aria-label="Open navigation"
+            aria-expanded={isMenuOpen}
+            onClick={() => setIsMenuOpen(true)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </div>
-      <div className="user-info">
-        <div className="user-name">Emma S.</div>
-      </div>
-    </div>
-  </header>
-);
+      <MobileMenu open={isMenuOpen} onClose={() => setIsMenuOpen(false)} userName="Emma S." navItems={navItems} />
+    </header>
+  );
+};
 
