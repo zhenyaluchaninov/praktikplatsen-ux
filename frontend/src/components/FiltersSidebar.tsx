@@ -64,7 +64,7 @@ export const FiltersSidebar = ({ groups, searchValue, onSearchChange, onToggleFi
       const next = { ...prev };
       groups.forEach((group) => {
         if (typeof next[group.id] === 'undefined') {
-          next[group.id] = true;
+          next[group.id] = false;
         }
       });
       return next;
@@ -102,7 +102,7 @@ export const FiltersSidebar = ({ groups, searchValue, onSearchChange, onToggleFi
       />
 
       {groups.map((group) => {
-        const isCollapsed = collapsedGroups[group.id] ?? true;
+        const isCollapsed = collapsedGroups[group.id] ?? false;
         return (
           <div className="filter-group" key={group.id}>
             <button

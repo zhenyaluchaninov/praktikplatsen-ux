@@ -1,4 +1,15 @@
+import { useEffect, useState } from 'react';
+
 import type { Placement } from '../types/placement';
+
+type HomeRequirementState = {
+  met: boolean;
+  text: string;
+  tooltip: string;
+  display: string;
+  blocking: boolean;
+  ready: boolean;
+};
 
 interface RightSidebarProps {
   activeTab: 'favorites' | 'applications';
@@ -16,12 +27,22 @@ interface RightSidebarProps {
   onWithdrawApplication: (id: number) => void;
   applyButtonLabel: string;
   applyButtonDisabled: boolean;
+  homeRequirement: HomeRequirementState;
 }
 
 const EmptyFavoriteState = () => (
   <div className="empty-state">
     <div className="empty-state-icon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#ccc"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
       </svg>
     </div>
@@ -33,7 +54,16 @@ const EmptyFavoriteState = () => (
 const EmptyApplicationsState = () => (
   <div className="empty-state">
     <div className="empty-state-icon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#ccc"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -42,7 +72,7 @@ const EmptyApplicationsState = () => (
       </svg>
     </div>
     <p>No applications yet</p>
-    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select favorites and click "Apply to Selected"</p>
+    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select favorites and click &quot;Apply to Selected&quot;</p>
   </div>
 );
 
@@ -62,9 +92,46 @@ export const RightSidebar = ({
   onWithdrawApplication,
   applyButtonLabel,
   applyButtonDisabled,
+  homeRequirement,
 }: RightSidebarProps) => {
   const favoritesEmpty = favoritePlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
+  const [bannerPhase, setBannerPhase] = useState<'visible' | 'hiding' | 'hidden'>(
+    homeRequirement.blocking ? 'visible' : 'hidden',
+  );
+
+  useEffect(() => {
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    let finishTimer: ReturnType<typeof setTimeout> | undefined;
+
+    if (homeRequirement.ready) {
+      setBannerPhase('visible');
+      hideTimer = setTimeout(() => setBannerPhase('hiding'), 1000);
+      finishTimer = setTimeout(() => setBannerPhase('hidden'), 1400);
+    } else {
+      setBannerPhase('visible');
+    }
+
+    return () => {
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+      }
+      if (finishTimer) {
+        clearTimeout(finishTimer);
+      }
+    };
+  }, [homeRequirement.ready, homeRequirement.text]);
+
+  const applyButtonTooltip = applyButtonDisabled && homeRequirement.blocking ? homeRequirement.tooltip : undefined;
+  const bannerClasses = [
+    'home-requirement-banner',
+    'tooltip-host',
+    homeRequirement.ready ? 'met' : '',
+    bannerPhase === 'hiding' ? 'hiding' : '',
+    bannerPhase === 'hidden' ? 'hidden' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <aside className="right-sidebar">
@@ -92,7 +159,11 @@ export const RightSidebar = ({
           </button>
         </div>
 
-        <div id="favoritesTab" className="tab-content" style={{ display: activeTab === 'favorites' ? 'block' : 'none' }}>
+        <div
+          id="favoritesTab"
+          className="tab-content"
+          style={{ display: activeTab === 'favorites' ? 'block' : 'none' }}
+        >
           <div
             style={{
               display: 'flex',
@@ -136,6 +207,24 @@ export const RightSidebar = ({
             </div>
           </div>
 
+          <div className={bannerClasses} data-tooltip={homeRequirement.tooltip}>
+            <span className="home-requirement-banner-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </span>
+            <span className="home-requirement-text">{homeRequirement.text}</span>
+          </div>
+
           <div className="saved-list" id="favoritesList">
             {favoritesEmpty ? (
               <EmptyFavoriteState />
@@ -143,10 +232,7 @@ export const RightSidebar = ({
               favoritePlacements.map((placement) => {
                 const isSelected = selectedFavorites.includes(placement.id);
                 return (
-                  <div
-                    key={placement.id}
-                    className={`saved-item ${isSelected ? 'selected' : ''}`}
-                  >
+                  <div className={`saved-item ${isSelected ? 'selected' : ''}`} key={placement.id}>
                     <input
                       type="checkbox"
                       className="saved-item-checkbox"
@@ -168,7 +254,16 @@ export const RightSidebar = ({
                           onRemoveFavorite(placement.id);
                         }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#999"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <polyline points="3 6 5 6 21 6"></polyline>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
@@ -179,12 +274,14 @@ export const RightSidebar = ({
               })
             )}
           </div>
+
           <button
             type="button"
-            className="btn-submit-all"
+            className="btn-submit-all tooltip-host"
             id="applyAllBtn"
             onClick={onApplyToSelected}
             disabled={applyButtonDisabled}
+            data-tooltip={applyButtonTooltip ?? undefined}
           >
             {applyButtonLabel}
           </button>
@@ -195,6 +292,27 @@ export const RightSidebar = ({
           className="tab-content"
           style={{ display: activeTab === 'applications' ? 'block' : 'none' }}
         >
+          {!applicationsEmpty && (
+            <div className="applications-info">
+              <span className="applications-info-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </span>
+              <div>
+                Your applications are being reviewed. You'll be notified via email as soon as there are updates.
+              </div>
+            </div>
+          )}
           <div className="saved-list" id="applicationsList">
             {applicationsEmpty ? (
               <EmptyApplicationsState />
@@ -215,7 +333,16 @@ export const RightSidebar = ({
                         onWithdrawApplication(placement.id);
                       }}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#999"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                       </svg>
@@ -224,18 +351,6 @@ export const RightSidebar = ({
                 </div>
               ))
             )}
-          </div>
-          <div
-            style={{
-              marginTop: '16px',
-              padding: '12px',
-              background: '#E8F5E9',
-              borderRadius: '8px',
-              fontSize: '13px',
-              color: '#2E7D32',
-            }}
-          >
-            ℹ️ Your applications are being reviewed. You'll be notified of any updates.
           </div>
         </div>
       </div>

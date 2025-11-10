@@ -6,6 +6,9 @@ import { useFavorites } from './useFavorites';
 import { useNotifications } from './useNotifications';
 
 const APPLICATION_LIMIT = 10;
+const HOME_MUNICIPALITY_REQUIREMENT = 3;
+const HOME_REQUIREMENT_TOOLTIP =
+  'You must apply for at least 3 placements in your own municipality before applying elsewhere. This ensures local students get priority for local placements.';
 
 export type SortOption = 'recommended' | 'newest' | 'available' | 'alphabetical' | 'homeArea';
 export type FilterGroupId = 'industry' | 'municipality' | 'type' | 'availability';
@@ -27,8 +30,8 @@ type FilterGroupView = {
 
 const placementsFromJson = placementsData as Placement[];
 
-const INITIAL_FAVORITES = [1, 3, 4, 7, 8];
-const INITIAL_APPLICATIONS = [2, 5, 6];
+const INITIAL_FAVORITES: number[] = [];
+const INITIAL_APPLICATIONS: number[] = [];
 
 const FILTER_GROUPS: FilterGroupId[] = ['industry', 'municipality', 'type', 'availability'];
 
@@ -97,6 +100,22 @@ const optionMatchesPlacement = (placement: Placement, groupId: FilterGroupId, op
 
 const placementMatchesFilters = (placement: Placement, filters: FiltersState) =>
   FILTER_GROUPS.every((groupId) => {
+    const selections = filters[groupId];
+    if (!selections || selections.size === 0) {
+      return true;
+    }
+    return Array.from(selections).some((optionId) => optionMatchesPlacement(placement, groupId, optionId));
+  });
+
+const placementMatchesFiltersExcluding = (
+  placement: Placement,
+  filters: FiltersState,
+  excludedGroup: FilterGroupId,
+) =>
+  FILTER_GROUPS.every((groupId) => {
+    if (groupId === excludedGroup) {
+      return true;
+    }
     const selections = filters[groupId];
     if (!selections || selections.size === 0) {
       return true;
@@ -230,6 +249,24 @@ export const usePlacements = () => {
     [allPlacements, searchValue],
   );
 
+  const placementsMatchingPerGroup = useMemo<Record<FilterGroupId, Placement[]>>(
+    () => ({
+      industry: placementsMatchingSearch.filter((placement) =>
+        placementMatchesFiltersExcluding(placement, filters, 'industry'),
+      ),
+      municipality: placementsMatchingSearch.filter((placement) =>
+        placementMatchesFiltersExcluding(placement, filters, 'municipality'),
+      ),
+      type: placementsMatchingSearch.filter((placement) =>
+        placementMatchesFiltersExcluding(placement, filters, 'type'),
+      ),
+      availability: placementsMatchingSearch.filter((placement) =>
+        placementMatchesFiltersExcluding(placement, filters, 'availability'),
+      ),
+    }),
+    [placementsMatchingSearch, filters],
+  );
+
   const filteredPlacements = useMemo(
     () => placementsMatchingSearch.filter((placement) => placementMatchesFilters(placement, filters)),
     [placementsMatchingSearch, filters],
@@ -242,19 +279,19 @@ export const usePlacements = () => {
 
   const industryCountMap = useMemo(() => {
     const counts = new Map<string, number>();
-    filteredPlacements.forEach((placement) => {
+    placementsMatchingPerGroup.industry.forEach((placement) => {
       counts.set(placement.industry, (counts.get(placement.industry) ?? 0) + 1);
     });
     return counts;
-  }, [filteredPlacements]);
+  }, [placementsMatchingPerGroup]);
 
   const municipalityCountMap = useMemo(() => {
     const counts = new Map<string, number>();
-    filteredPlacements.forEach((placement) => {
+    placementsMatchingPerGroup.municipality.forEach((placement) => {
       counts.set(placement.municipality, (counts.get(placement.municipality) ?? 0) + 1);
     });
     return counts;
-  }, [filteredPlacements]);
+  }, [placementsMatchingPerGroup]);
 
   const filterGroups = useMemo<FilterGroupView[]>(() => {
     if (allPlacements.length === 0) {
@@ -296,7 +333,7 @@ export const usePlacements = () => {
         options: typeFilterOptions.map((option) => ({
           id: option.id,
           label: option.label,
-          count: filteredPlacements.filter((placement) => option.match(placement)).length,
+          count: placementsMatchingPerGroup.type.filter((placement) => option.match(placement)).length,
           checked: filters.type.has(option.id),
         })),
       });
@@ -309,7 +346,7 @@ export const usePlacements = () => {
         options: availabilityFilterOptions.map((option) => ({
           id: option.id,
           label: option.label,
-          count: filteredPlacements.filter((placement) => option.match(placement)).length,
+          count: placementsMatchingPerGroup.availability.filter((placement) => option.match(placement)).length,
           checked: filters.availability.has(option.id),
         })),
       });
@@ -319,12 +356,12 @@ export const usePlacements = () => {
   }, [
     allPlacements.length,
     availabilityFilterOptions,
-    filteredPlacements,
     filters,
     industryCountMap,
     industryValues,
     municipalityCountMap,
     municipalityValues,
+    placementsMatchingPerGroup,
     typeFilterOptions,
   ]);
 
@@ -343,6 +380,26 @@ export const usePlacements = () => {
         .filter((placement): placement is Placement => Boolean(placement)),
     [applications, placementsById],
   );
+
+  const homeApplicationsCount = useMemo(
+    () => appliedPlacements.filter((placement) => placement.homeArea).length,
+    [appliedPlacements],
+  );
+
+  const selectedFavoritesHomeCount = useMemo(
+    () => selectedFavorites.reduce((count, id) => count + (placementsById.get(id)?.homeArea ? 1 : 0), 0),
+    [selectedFavorites, placementsById],
+  );
+
+  const homeRequirementMet = homeApplicationsCount >= HOME_MUNICIPALITY_REQUIREMENT;
+  const homeRequirementSatisfiedAfterSelection =
+    homeRequirementMet || homeApplicationsCount + selectedFavoritesHomeCount >= HOME_MUNICIPALITY_REQUIREMENT;
+  const homeRequirementBlocking = !homeRequirementSatisfiedAfterSelection;
+  const homeRequirementDisplayCount = Math.min(
+    homeApplicationsCount + selectedFavoritesHomeCount,
+    HOME_MUNICIPALITY_REQUIREMENT,
+  );
+  const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_MUNICIPALITY_REQUIREMENT}`;
 
   const toggleFavorite = useCallback(
     (id: number) => {
@@ -395,6 +452,14 @@ export const usePlacements = () => {
   );
 
   const applyToSelected = useCallback(() => {
+    if (!homeRequirementSatisfiedAfterSelection) {
+      showNotification(
+        'Apply in your municipality first',
+        `Select placements in your municipality until you reach ${HOME_MUNICIPALITY_REQUIREMENT} applications.`,
+      );
+      return;
+    }
+
     setApplications((prev) => {
       if (prev.length >= APPLICATION_LIMIT) {
         showNotification('Application limit reached', 'You can only apply to 10 placements');
@@ -418,7 +483,7 @@ export const usePlacements = () => {
       showNotification(`Applied to ${toApply.length} placements!`, 'Check "Applied" tab to see them');
       return [...prev, ...toApply];
     });
-  }, [removeFavorites, selectedFavorites, showNotification]);
+  }, [homeRequirementSatisfiedAfterSelection, removeFavorites, selectedFavorites, showNotification]);
 
   const withdrawApplication = useCallback(
     (id: number) => {
@@ -466,10 +531,9 @@ export const usePlacements = () => {
 
   const progressCount = `${applications.length}/${APPLICATION_LIMIT}`;
   const progressPercentage = Math.min(100, (applications.length / APPLICATION_LIMIT) * 100);
-
   const canApplyMore = applications.length < APPLICATION_LIMIT;
   const applyButtonLabel = `Apply to Selected (${selectedFavorites.length})`;
-  const applyButtonDisabled = selectedFavorites.length === 0 || !canApplyMore;
+  const applyButtonDisabled = selectedFavorites.length === 0 || !canApplyMore || homeRequirementBlocking;
   const resultsLabel = `Showing ${sortedPlacements.length} ${sortedPlacements.length === 1 ? 'placement' : 'placements'}`;
 
   return {
@@ -498,7 +562,14 @@ export const usePlacements = () => {
       count: progressCount,
       percentage: progressPercentage,
       week: 'Week: 34-37, 2025',
-      requirement: 'Minimum 3 in your home municipality met (3/3)',
+    },
+    homeRequirement: {
+      met: homeRequirementMet,
+      text: `Apply to at least ${HOME_MUNICIPALITY_REQUIREMENT} placements in your municipality (${homeRequirementDisplay})`,
+      tooltip: HOME_REQUIREMENT_TOOLTIP,
+      display: homeRequirementDisplay,
+      blocking: homeRequirementBlocking,
+      ready: !homeRequirementBlocking,
     },
     resultsLabel,
     favoritesCount: favorites.length,

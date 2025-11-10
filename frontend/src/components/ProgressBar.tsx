@@ -2,15 +2,9 @@ interface ProgressBarProps {
   countText: string;
   percentage: number;
   weekLabel: string;
-  requirementText: string;
 }
 
-export const ProgressBar = ({
-  countText,
-  percentage,
-  weekLabel,
-  requirementText,
-}: ProgressBarProps) => (
+export const ProgressBar = ({ countText, percentage, weekLabel }: ProgressBarProps) => (
   <div className="progress-section">
     <div className="progress-content">
       <div className="progress-header">
@@ -22,10 +16,6 @@ export const ProgressBar = ({
       <div className="progress-bar">
         <div className="progress-fill" id="progressFill" style={{ width: `${percentage}%` }}></div>
       </div>
-      <div className="progress-requirements">
-        ✓ <span className="requirement-met">{requirementText}</span>
-      </div>
     </div>
   </div>
 );
-

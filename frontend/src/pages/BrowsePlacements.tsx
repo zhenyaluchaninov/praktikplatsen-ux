@@ -34,6 +34,7 @@ const BrowsePlacements = () => {
     applicationsCount,
     applyButtonLabel,
     applyButtonDisabled,
+    homeRequirement,
     filterGroups,
     searchValue,
     onSearchChange,
@@ -43,18 +44,13 @@ const BrowsePlacements = () => {
     onSortChange,
   } = usePlacements();
 
-  const handleNotificationsClick = () => {
-    window.alert('Notifications panel would open here');
-  };
-
   return (
     <>
-      <Header onNotificationsClick={handleNotificationsClick} />
+      <Header />
       <ProgressBar
         countText={progress.count}
         percentage={progress.percentage}
         weekLabel={progress.week}
-        requirementText={progress.requirement}
       />
       <div className="main-container">
         <FiltersSidebar
@@ -90,6 +86,7 @@ const BrowsePlacements = () => {
           onWithdrawApplication={withdrawApplication}
           applyButtonLabel={applyButtonLabel}
           applyButtonDisabled={applyButtonDisabled}
+          homeRequirement={homeRequirement}
         />
       </div>
       {notification && (
