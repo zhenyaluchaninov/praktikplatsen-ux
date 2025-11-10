@@ -8,9 +8,11 @@ type TooltipProps = {
 
 export const Tooltip = ({ content, children }: TooltipProps) => {
   const triggerRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const hideTimeoutRef = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [position, setPosition] = useState({ top: 0, left: 0, height: 0 });
+  const [placement, setPlacement] = useState<'above' | 'below'>('above');
 
   const clearHideTimeout = () => {
     if (hideTimeoutRef.current) {
@@ -19,14 +21,27 @@ export const Tooltip = ({ content, children }: TooltipProps) => {
     }
   };
 
-  const updatePosition = () => {
+  const getReferenceRect = () => {
     if (!triggerRef.current) {
-      return;
+      return null;
     }
     const rect = triggerRef.current.getBoundingClientRect();
+    if (rect.width > 0 || rect.height > 0) {
+      return rect;
+    }
+    const fallback = triggerRef.current.firstElementChild as HTMLElement | null;
+    return fallback?.getBoundingClientRect() ?? rect;
+  };
+
+  const updatePosition = () => {
+    const rect = getReferenceRect();
+    if (!rect) {
+      return;
+    }
     setPosition({
       top: rect.top,
       left: rect.left + rect.width / 2,
+      height: rect.height,
     });
   };
 
@@ -63,6 +78,17 @@ export const Tooltip = ({ content, children }: TooltipProps) => {
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !tooltipRef.current) {
+      return;
+    }
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const spaceAbove = position.top;
+    const spaceBelow = window.innerHeight - (position.top + position.height);
+    const needsBelow = spaceAbove < tooltipRect.height + 12 && spaceBelow > spaceAbove;
+    setPlacement(needsBelow ? 'below' : 'above');
+  }, [open, position]);
+
   useEffect(
     () => () => {
       clearHideTimeout();
@@ -94,7 +120,17 @@ export const Tooltip = ({ content, children }: TooltipProps) => {
       </span>
       {open && content
         ? createPortal(
-            <div className="tooltip-floating" role="status" aria-live="polite" style={{ top: position.top - 12, left: position.left }}>
+            <div
+              ref={tooltipRef}
+              className="tooltip-floating"
+              role="status"
+              aria-live="polite"
+              style={
+                placement === 'above'
+                  ? { top: position.top - 8, left: position.left, transform: 'translate(-50%, -100%)' }
+                  : { top: position.top + position.height + 8, left: position.left, transform: 'translate(-50%, 0)' }
+              }
+            >
               {content}
             </div>,
             document.body,

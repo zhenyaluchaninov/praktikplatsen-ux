@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { BottomSheet } from '../components/BottomSheet';
 import { FiltersModal } from '../components/FiltersModal';
@@ -52,6 +52,8 @@ const BrowsePlacements = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [headerHidden, setHeaderHidden] = useState(false);
+  const headerRef = useRef<HTMLElement | null>(null);
+  const stickyStackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -67,6 +69,10 @@ const BrowsePlacements = () => {
 
   useEffect(() => {
     const threshold = 40;
+    if (!isMobile) {
+      setHeaderHidden(false);
+      return;
+    }
     const handleScroll = () => {
       const shouldHide = window.scrollY > threshold;
       setHeaderHidden(shouldHide);
@@ -74,14 +80,31 @@ const BrowsePlacements = () => {
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
-    document.body.classList.toggle('header-collapsed', headerHidden);
+    const collapsed = isMobile && headerHidden;
+    document.body.classList.toggle('header-collapsed', collapsed);
     return () => {
       document.body.classList.remove('header-collapsed');
     };
-  }, [headerHidden]);
+  }, [headerHidden, isMobile]);
+
+  useEffect(() => {
+    const updateMeasurements = () => {
+      const measuredHeader = headerRef.current?.offsetHeight ?? 0;
+      if (measuredHeader > 0) {
+        document.documentElement.style.setProperty('--header-height', `${measuredHeader}px`);
+      }
+      const stackHeight = stickyStackRef.current?.offsetHeight ?? 0;
+      if (stackHeight > 0) {
+        document.documentElement.style.setProperty('--sticky-stack-offset', `${stackHeight}px`);
+      }
+    };
+    updateMeasurements();
+    window.addEventListener('resize', updateMeasurements);
+    return () => window.removeEventListener('resize', updateMeasurements);
+  }, [isMobile, headerHidden]);
 
   const activeFiltersCount = useMemo(
     () =>
@@ -97,21 +120,32 @@ const BrowsePlacements = () => {
 
   return (
     <>
-      <Header hidden={headerHidden} />
-      <ProgressBar
-        countText={progress.count}
-        percentage={progress.percentage}
-        weekLabel={progress.week}
-      />
-      {isMobile && (
-        <div className={`mobile-toolbar ${headerHidden ? 'mobile-toolbar--pinned' : ''}`}>
-          <button type="button" className="mobile-toolbar__filter" onClick={openFilters}>
-            Filters
-            {activeFiltersCount > 0 && <span className="mobile-toolbar__badge">{activeFiltersCount}</span>}
-          </button>
-          <SortControl sortOption={sortOption} onSortChange={onSortChange} triggerLabel="Sort" className="mobile-toolbar__sort" />
+      <div className="sticky-stack" ref={stickyStackRef}>
+        <Header ref={headerRef} />
+        <div className="sticky-panels">
+          <ProgressBar
+            countText={progress.count}
+            percentage={progress.percentage}
+            weekLabel={progress.week}
+          />
+          {isMobile && (
+            <div className="mobile-toolbar">
+              <button type="button" className="mobile-toolbar__filter" onClick={openFilters}>
+                <span className="mobile-toolbar__filter-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 6h16" />
+                    <path d="M7 12h10" />
+                    <path d="M10 18h4" />
+                  </svg>
+                </span>
+                <span className="mobile-toolbar__filter-label">Filters</span>
+                {activeFiltersCount > 0 && <span className="mobile-toolbar__badge">{activeFiltersCount}</span>}
+              </button>
+              <SortControl sortOption={sortOption} onSortChange={onSortChange} triggerLabel="Sort" className="mobile-toolbar__sort" />
+            </div>
+          )}
         </div>
-      )}
+      </div>
       <div className="main-container">
         {!isMobile && (
           <FiltersSidebar

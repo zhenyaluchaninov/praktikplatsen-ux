@@ -1,21 +1,19 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 
 import { MobileMenu } from './MobileMenu';
 
-type HeaderProps = {
-  hidden?: boolean;
-};
+type HeaderProps = Record<string, never>;
 
 const navItems = [
   { label: 'Browse Placements', href: '#browse', active: true },
   { label: 'History', href: '#history', active: false },
 ];
 
-export const Header = ({ hidden = false }: HeaderProps) => {
+export const Header = forwardRef<HTMLElement, HeaderProps>((_, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className={`header ${hidden ? 'header--hidden' : ''}`.trim()}>
+    <header ref={ref} className="header">
       <div className="header-content">
         <div className="header-nav">
           <div className="logo">
@@ -56,5 +54,7 @@ export const Header = ({ hidden = false }: HeaderProps) => {
       <MobileMenu open={isMenuOpen} onClose={() => setIsMenuOpen(false)} userName="Emma S." navItems={navItems} />
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
 

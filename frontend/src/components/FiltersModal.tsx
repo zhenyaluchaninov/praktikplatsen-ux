@@ -11,26 +11,47 @@ type FiltersModalProps = FiltersContentProps & {
 };
 
 type PanelStyle = CSSProperties & {
-  '--filters-drag-offset'?: string;
+  '--filters-panel-top'?: string;
 };
+
+const readCssVar = (name: string, fallback: number) => {
+  const value = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+  return Number.isNaN(value) ? fallback : value;
+};
+
+const readSnapSettings = () => ({
+  topGap: readCssVar('--filters-top-gap', 140),
+  bottomGap: readCssVar('--filters-bottom-gap', 0),
+  closeDelta: readCssVar('--filters-close-delta', 80),
+});
 
 export const FiltersModal = ({ open, onClose, ...contentProps }: FiltersModalProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<number | null>(null);
-  const [expanded, setExpanded] = useState(false);
   const [dragDelta, setDragDelta] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [snap, setSnap] = useState<'top' | 'bottom'>('bottom');
+  const [{ top, bottom }, setSnapPositions] = useState({ top: 140, bottom: 360 });
+  const [closeDelta, setCloseDelta] = useState(80);
+
+  const clamp = useCallback(
+    (value: number) => Math.max(top, Math.min(bottom, value)),
+    [top, bottom],
+  );
+
+  const targetTop = snap === 'top' ? top : bottom;
+  const currentTop = clamp(targetTop + (isDragging ? dragDelta : 0));
 
   useEffect(() => {
     if (!open) {
       return;
     }
+    document.body.classList.add('modal-open');
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
       }
     };
-    document.body.classList.add('modal-open');
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.body.classList.remove('modal-open');
@@ -44,18 +65,42 @@ export const FiltersModal = ({ open, onClose, ...contentProps }: FiltersModalPro
     }
     const previouslyFocused = document.activeElement as HTMLElement | null;
     panelRef.current.focus();
-    return () => {
-      previouslyFocused?.focus();
-    };
+    return () => previouslyFocused?.focus();
   }, [open]);
 
   useEffect(() => {
     if (!open) {
-      setExpanded(false);
+      setSnap('bottom');
       setDragDelta(0);
-      dragStartRef.current = null;
       setIsDragging(false);
+      return;
     }
+    const panel = panelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    const updatePositions = () => {
+      const { topGap, bottomGap, closeDelta: delta } = readSnapSettings();
+      setCloseDelta(delta);
+      const minTop = Math.max(topGap, 16);
+      const bottomPosition = window.innerHeight - bottomGap;
+      setSnapPositions({ top: minTop, bottom: bottomPosition });
+    };
+
+    updatePositions();
+    const resizeObserver =
+      'ResizeObserver' in window
+        ? new ResizeObserver(() => {
+            updatePositions();
+          })
+        : null;
+    resizeObserver?.observe(panel);
+    window.addEventListener('resize', updatePositions);
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updatePositions);
+    };
   }, [open]);
 
   const finishDrag = useCallback(
@@ -67,18 +112,23 @@ export const FiltersModal = ({ open, onClose, ...contentProps }: FiltersModalPro
         return;
       }
       const delta = clientY - dragStartRef.current;
-      if (delta > 60) {
+      const startTop = snap === 'top' ? top : bottom;
+      const rawNextTop = startTop + delta;
+      const nextTop = clamp(rawNextTop);
+
+      if (snap === 'bottom' && rawNextTop >= bottom + closeDelta) {
         onClose();
-      } else if (delta < -60) {
-        setExpanded(true);
-      } else if (Math.abs(delta) < 20 && !expanded) {
-        setExpanded(true);
+      } else {
+        const distanceToTop = Math.abs(nextTop - top);
+        const distanceToBottom = Math.abs(nextTop - bottom);
+        setSnap(distanceToTop <= distanceToBottom ? 'top' : 'bottom');
       }
+
       dragStartRef.current = null;
       setDragDelta(0);
       setIsDragging(false);
     },
-    [expanded, onClose],
+    [bottom, clamp, closeDelta, onClose, snap, top],
   );
 
   useEffect(() => {
@@ -115,18 +165,20 @@ export const FiltersModal = ({ open, onClose, ...contentProps }: FiltersModalPro
     if (isDragging) {
       return;
     }
-    setExpanded((prev) => !prev);
+    setSnap((prev) => (prev === 'top' ? 'bottom' : 'top'));
   };
 
   if (!open) {
     return null;
   }
 
-  const dragOffset = Math.max(Math.min(dragDelta, 240), -240);
-  const panelClasses = ['filters-modal__panel', expanded ? 'filters-modal__panel--expanded' : '']
+  const panelClasses = ['filters-modal__panel', snap === 'top' ? 'filters-modal__panel--expanded' : '']
     .filter(Boolean)
     .join(' ');
-  const panelStyle: PanelStyle = { '--filters-drag-offset': `${dragOffset}px` };
+  const panelHeight = panelRef.current?.offsetHeight ?? 0;
+  const panelStyle: PanelStyle = {
+    '--filters-panel-top': `${currentTop - panelHeight}px`,
+  };
 
   return createPortal(
     <div className="filters-modal" role="dialog" aria-modal="true" aria-label="Filters">
