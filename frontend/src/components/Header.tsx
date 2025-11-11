@@ -1,15 +1,15 @@
-import { forwardRef, useState, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, useState } from 'react';
 
 import { MobileMenu } from './MobileMenu';
 
-type HeaderProps = ComponentPropsWithoutRef<'header'>;
+type HeaderProps = {};
 
 const navItems = [
   { label: 'Browse Placements', href: '#browse', active: true },
   { label: 'History', href: '#history', active: false },
 ];
 
-export const Header = forwardRef<HTMLElement, HeaderProps>((_props, ref) => {
+export const Header = forwardRef<HTMLElement, HeaderProps>((_, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
