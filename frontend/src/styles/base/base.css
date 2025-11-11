@@ -2,6 +2,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -33,6 +34,7 @@
             --filters-bottom-gap: 220px;
             --filters-close-delta: 80px;
             --mobile-nav-height: 72px;
+            --focus-ring-color: #ffb74d;
         }
 
         .sr-only {
@@ -46,3 +48,15 @@
             border: 0;
         }
 
+        /* Global focus handling: hide pointer/touch glow, keep keyboard ring */
+        *:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        *:focus-visible {
+            outline: 2px solid var(--focus-ring-color, #ffb74d);
+            outline-offset: 3px;
+            border-radius: 6px;
+        }

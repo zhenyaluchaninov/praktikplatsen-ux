@@ -253,8 +253,8 @@
             margin-bottom: 12px;
             background: #FFF4E5;
             border-radius: 10px;
-            border: 1.5px dashed rgba(179, 71, 0, 0.8);
-            color: #B34700;
+            border: 1.5px dashed #e4a981;
+            color: #e4a981;
             font-size: 13px;
             align-items: center;
             opacity: 1;
@@ -265,8 +265,8 @@
 
         .home-requirement-banner.met {
             background: #E8F5E9;
-            color: #2E7D32;
-            border-color: rgba(46, 125, 50, 0.8);
+            color: #80ad84;
+            border-color: #80ad84;
         }
 
         .home-requirement-banner.hiding,
