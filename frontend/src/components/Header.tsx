@@ -2,7 +2,7 @@ import { forwardRef, useState } from 'react';
 
 import { MobileMenu } from './MobileMenu';
 
-type HeaderProps = Record<string, never>;
+type HeaderProps = {};
 
 const navItems = [
   { label: 'Browse Placements', href: '#browse', active: true },

@@ -96,6 +96,9 @@
             display: flex;
             flex-direction: column;
         }
+        .bottom-sheet.dragging {
+            transition: none;
+        }
 
         .bottom-sheet.collapsed {
             --bottom-sheet-translate: calc(100% - var(--bottom-sheet-collapsed-height));
