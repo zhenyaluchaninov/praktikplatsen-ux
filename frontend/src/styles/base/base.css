@@ -13,13 +13,8 @@
         }
 
         body.modal-open,
-        body.menu-open,
-        body.sheet-open {
+        body.menu-open {
             overflow: hidden;
-        }
-
-        body.sheet-open .main-container {
-            padding-bottom: calc(var(--bottom-sheet-collapsed-height) + 180px);
         }
 
         body.header-collapsed .sticky-stack {
@@ -32,12 +27,12 @@
             --cards-section-gap: 0px;
             --results-header-spacing: 8px;
             --header-height: 72px;
-            --bottom-sheet-collapsed-height: 86px;
             --mobile-progress-visible-height: 150px;
             --sticky-stack-offset: 160px;
             --filters-top-gap: 0px;
             --filters-bottom-gap: 220px;
             --filters-close-delta: 80px;
+            --mobile-nav-height: 72px;
         }
 
         .sr-only {

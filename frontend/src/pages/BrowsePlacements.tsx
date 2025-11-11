@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { BottomSheet } from '../components/BottomSheet';
 import { FiltersModal } from '../components/FiltersModal';
 import { FiltersSidebar } from '../components/FiltersSidebar';
 import { Header } from '../components/Header';
+import { MobileViewBar, type MobileView } from '../components/MobileViewBar';
 import { ModalPlacementDetails } from '../components/ModalPlacementDetails';
 import { NotificationToast } from '../components/NotificationToast';
 import { PlacementsGrid } from '../components/PlacementsGrid';
 import { ProgressBar } from '../components/ProgressBar';
 import { RightSidebar } from '../components/RightSidebar';
+import { SavedPanels } from '../components/SavedPanels';
 import { SortControl } from '../components/SortControl';
 import { usePlacements } from '../hooks/usePlacements';
 
@@ -52,6 +53,7 @@ const BrowsePlacements = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [headerHidden, setHeaderHidden] = useState(false);
+  const [mobileView, setMobileView] = useState<MobileView>('explore');
   const headerRef = useRef<HTMLElement | null>(null);
   const stickyStackRef = useRef<HTMLDivElement | null>(null);
 
@@ -117,6 +119,26 @@ const BrowsePlacements = () => {
 
   const openFilters = () => setFiltersOpen(true);
   const closeFilters = () => setFiltersOpen(false);
+  const handleMobileViewChange = useCallback(
+    (view: MobileView) => {
+      setMobileView(view);
+      if (!isMobile) {
+        return;
+      }
+      if (view === 'wishlist' && activeTab !== 'favorites') {
+        setActiveTab('favorites');
+      } else if (view === 'applied' && activeTab !== 'applications') {
+        setActiveTab('applications');
+      }
+    },
+    [activeTab, isMobile, setActiveTab],
+  );
+
+  useEffect(() => {
+    if (!isMobile && mobileView !== 'explore') {
+      setMobileView('explore');
+    }
+  }, [isMobile, mobileView]);
 
   return (
     <>
@@ -128,7 +150,7 @@ const BrowsePlacements = () => {
             percentage={progress.percentage}
             weekLabel={progress.week}
           />
-          {isMobile && (
+          {isMobile && mobileView === 'explore' && (
             <div className="mobile-toolbar">
               <button type="button" className="mobile-toolbar__filter" onClick={openFilters}>
                 <span className="mobile-toolbar__filter-icon" aria-hidden="true">
@@ -156,16 +178,46 @@ const BrowsePlacements = () => {
             onClearFilters={onClearFilters}
           />
         )}
-        <PlacementsGrid
-          placements={placements}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
-          onShowDetails={openModal}
-          resultsLabel={resultsLabel}
-          sortOption={sortOption}
-          onSortChange={onSortChange}
-          searchValue={searchValue}
-        />
+        {(!isMobile || mobileView === 'explore') && (
+          <PlacementsGrid
+            placements={placements}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            onShowDetails={openModal}
+            resultsLabel={resultsLabel}
+            sortOption={sortOption}
+            onSortChange={onSortChange}
+            searchValue={searchValue}
+          />
+        )}
+        {isMobile && mobileView !== 'explore' && (
+          <section
+            className={`mobile-saved-panels mobile-saved-panels--${mobileView}`}
+            aria-label={mobileView === 'wishlist' ? 'Wishlist' : 'Applied'}
+          >
+            <SavedPanels
+              activeTab={activeTab}
+              favoritesCount={favoritesCount}
+              applicationsCount={applicationsCount}
+              favoritePlacements={favoritePlacements}
+              appliedPlacements={appliedPlacements}
+              selectedFavorites={selectedFavorites}
+              onTabChange={setActiveTab}
+              onToggleFavoriteSelection={toggleFavoriteSelection}
+              onSelectAllFavorites={selectAllFavorites}
+              onDeselectAllFavorites={deselectAllFavorites}
+              onRemoveFavorite={removeFavorite}
+              onApplyToSelected={applyToSelected}
+              onWithdrawApplication={withdrawApplication}
+              applyButtonLabel={applyButtonLabel}
+              applyButtonDisabled={applyButtonDisabled}
+              homeRequirement={homeRequirement}
+              showTabs={false}
+              showMobileHeading={false}
+              mobileMode
+            />
+          </section>
+        )}
         {!isMobile && (
           <RightSidebar
             activeTab={activeTab}
@@ -200,25 +252,17 @@ const BrowsePlacements = () => {
         onToggleFilter={onToggleFilter}
         onClearFilters={onClearFilters}
       />
-      <BottomSheet
-        enabled={isMobile}
-        activeTab={activeTab}
-        favoritesCount={favoritesCount}
-        applicationsCount={applicationsCount}
-        favoritePlacements={favoritePlacements}
-        appliedPlacements={appliedPlacements}
-        selectedFavorites={selectedFavorites}
-        onTabChange={setActiveTab}
-        onToggleFavoriteSelection={toggleFavoriteSelection}
-        onSelectAllFavorites={selectAllFavorites}
-        onDeselectAllFavorites={deselectAllFavorites}
-        onRemoveFavorite={removeFavorite}
-        onApplyToSelected={applyToSelected}
-        onWithdrawApplication={withdrawApplication}
-        applyButtonLabel={applyButtonLabel}
-        applyButtonDisabled={applyButtonDisabled}
-        homeRequirement={homeRequirement}
-      />
+      {isMobile && (
+        <MobileViewBar
+          activeView={mobileView}
+          onChange={handleMobileViewChange}
+          counts={{
+            explore: placements.length,
+            wishlist: favoritesCount,
+            applied: applicationsCount,
+          }}
+        />
+      )}
     </>
   );
 };

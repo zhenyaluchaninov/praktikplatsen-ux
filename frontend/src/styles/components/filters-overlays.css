@@ -65,89 +65,6 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Bottom Sheet */
-        .bottom-sheet-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.25);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 130;
-        }
-
-        .bottom-sheet-backdrop.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .bottom-sheet {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: min(75vh, 620px);
-            background: #fff;
-            border-radius: 24px 24px 0 0;
-            box-shadow: 0 -12px 32px rgba(0,0,0,0.18);
-            z-index: 140;
-            transform: translate3d(0, calc(var(--bottom-sheet-translate, 0px) + var(--sheet-drag-offset, 0px)), 0);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        .bottom-sheet.dragging {
-            transition: none;
-        }
-
-        .bottom-sheet.collapsed {
-            --bottom-sheet-translate: calc(100% - var(--bottom-sheet-collapsed-height));
-        }
-
-        .bottom-sheet.expanded {
-            --bottom-sheet-translate: 0px;
-        }
-
-        .bottom-sheet__header {
-            position: relative;
-            padding: 18px 16px 2px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            touch-action: none;
-        }
-
-        .bottom-sheet__header:focus-visible {
-            outline: 2px solid rgba(255, 153, 51, 0.4);
-            outline-offset: 4px;
-        }
-
-        .bottom-sheet__grip {
-            position: absolute;
-            top: 8px;
-            left: 50%;
-            width: 48px;
-            height: 4px;
-            border-radius: 999px;
-            background: #d0d0d0;
-            transform: translateX(-50%);
-            touch-action: none;
-        }
-
-        .bottom-sheet__content {
-            padding: 0 16px 24px;
-        }
-
-        .bottom-sheet.expanded .bottom-sheet__content {
-            overflow-y: auto;
-        }
-
-        .bottom-sheet.collapsed .bottom-sheet__content {
-            overflow: hidden;
-            max-height: var(--bottom-sheet-collapsed-height);
-        }
-
         @media (max-width: 1648px) {
             .sidebar-card {
                 right: 58px;
@@ -193,12 +110,69 @@
             color: #FF9933;
         }
 
+        .saved-panels {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .saved-panels--mobile {
+            gap: 16px;
+        }
+
+        .saved-panels__mobile-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .saved-panels__mobile-heading-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .saved-panels__mobile-eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .saved-panels__mobile-title {
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.1;
+            color: #111;
+            font-weight: 700;
+        }
+
+        .saved-panels__mobile-count {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: #111;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .tab-content {
             display: flex;
             flex-direction: column;
             overflow-y: auto;
             flex: 1;
             min-height: 0;
+        }
+
+        .saved-panels--mobile .tab-content {
+            padding: 0;
+            overflow: visible;
         }
 
         .applications-info {
@@ -305,6 +279,12 @@
             padding-right: 4px;
         }
 
+        .saved-panels--mobile .saved-list {
+            padding: 0;
+            gap: 10px;
+            overflow: visible;
+        }
+
         .saved-item {
             padding: 12px;
             background: #f9f9f9;
@@ -313,6 +293,34 @@
             align-items: center;
             gap: 12px;
             transition: background 0.2s;
+            border: 1px solid transparent;
+            box-sizing: border-box;
+        }
+
+        .saved-panels--mobile .saved-item {
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: #fff;
+            border: 1px solid transparent;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .saved-panels--mobile .saved-item:hover {
+            background: #fff;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .saved-panels--mobile .saved-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            }
+        }
+
+        .saved-panels--mobile .saved-controls {
+            margin-top: 0;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
         }
 
         .saved-item:hover {
@@ -375,6 +383,7 @@
             color: #666;
         }
 
+
         .saved-item-actions {
             display: flex;
             gap: 4px;
@@ -390,6 +399,15 @@
         .empty-state-icon {
             font-size: 48px;
             margin-bottom: 16px;
+        }
+
+        .saved-panels__mobile-submit {
+            margin-top: 20px;
+        }
+
+        .saved-panels--mobile .btn-submit-all {
+            width: 100%;
+            margin-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
         }
 
         .btn-submit-all {
