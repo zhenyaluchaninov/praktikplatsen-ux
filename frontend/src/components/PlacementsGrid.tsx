@@ -154,10 +154,10 @@ export const PlacementsGrid = ({
   return (
     <main className="cards-section">
       <div className="results-header">
-        <div className="results-count" id="resultsCount">
+        <SortControl sortOption={sortOption} onSortChange={onSortChange} triggerLabel="Sort" />
+        <span className="sr-only" role="status" aria-live="polite" id="resultsCount">
           {resultsLabel}
-        </div>
-        <SortControl sortOption={sortOption} onSortChange={onSortChange} />
+        </span>
       </div>
 
       <div className="cards-grid" id="cardsGrid">

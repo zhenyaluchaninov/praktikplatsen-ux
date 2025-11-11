@@ -21,6 +21,8 @@ export type FiltersContentProps = {
   onSearchChange: (value: string) => void;
   onToggleFilter: (groupId: FilterGroupId, optionId: string) => void;
   onClearFilters: () => void;
+  showSearchInput?: boolean;
+  showHeader?: boolean;
 };
 
 const groupIcons: Record<FilterGroupId, ReactElement> = {
@@ -62,6 +64,8 @@ export const FiltersContent = ({
   onSearchChange,
   onToggleFilter,
   onClearFilters,
+  showSearchInput = true,
+  showHeader = true,
 }: FiltersContentProps) => {
   const [collapsedGroups, setCollapsedGroups] = useState<Partial<Record<FilterGroupId, boolean>>>({});
 
@@ -91,21 +95,25 @@ export const FiltersContent = ({
 
   return (
     <>
-      <div className="filters-header">
-        <h2 className="filters-title">Filters</h2>
-        <a href="#clear" className="clear-filters" onClick={handleClear}>
-          Clear all
-        </a>
-      </div>
+      {showHeader && (
+        <div className="filters-header">
+          <h2 className="filters-title">Filters</h2>
+          <a href="#clear" className="clear-filters" onClick={handleClear}>
+            Clear all
+          </a>
+        </div>
+      )}
 
-      <input
-        type="text"
-        className="search-box"
-        placeholder="Search by name, company..."
-        id="searchInput"
-        value={searchValue}
-        onChange={(event) => onSearchChange(event.target.value)}
-      />
+      {showSearchInput && (
+        <input
+          type="text"
+          className="search-box"
+          placeholder="Search by name, company..."
+          id="searchInput"
+          value={searchValue}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+      )}
 
       {groups.map((group) => {
         const isCollapsed = collapsedGroups[group.id] ?? false;

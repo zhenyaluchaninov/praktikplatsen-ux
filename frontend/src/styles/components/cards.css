@@ -178,14 +178,9 @@
 
         .results-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: var(--results-header-spacing);
-        }
-
-        .results-count {
-            font-size: 14px;
-            color: #666;
         }
 
         .sort-control {
@@ -517,5 +512,24 @@
             background: #f8f8f8;
             border-color: #999;
             color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .results-header {
+                width: 100%;
+            }
+
+            .results-header .sort-control {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            .results-header .sort-menu {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                width: min(120px, calc(100vw - 32px));
+            }
         }
 
