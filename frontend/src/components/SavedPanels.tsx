@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import type { Placement } from '../types/placement';
 import { Tooltip } from './Tooltip';
 
@@ -29,6 +27,10 @@ export type SavedPanelsProps = {
   applyButtonLabel: string;
   applyButtonDisabled: boolean;
   homeRequirement: HomeRequirementState;
+  showTabs?: boolean;
+  heading?: string;
+  showMobileHeading?: boolean;
+  mobileMode?: boolean;
 };
 
 const EmptyFavoriteState = () => (
@@ -76,64 +78,66 @@ export const SavedPanels = ({
   applyButtonLabel,
   applyButtonDisabled,
   homeRequirement,
+  showTabs = true,
+  heading,
+  showMobileHeading = true,
+  mobileMode = false,
 }: SavedPanelsProps) => {
   const favoritesEmpty = favoritePlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
-  const [bannerPhase, setBannerPhase] = useState<'visible' | 'hiding' | 'hidden'>(
-    homeRequirement.blocking ? 'visible' : 'hidden',
+  const applyButtonTooltip = applyButtonDisabled && homeRequirement.blocking ? homeRequirement.tooltip : undefined;
+  const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
+
+  const activeHeading = heading ?? (activeTab === 'favorites' ? 'Wishlist' : 'Applied');
+  const activeHeadingCount = activeTab === 'favorites' ? favoritesCount : applicationsCount;
+
+  const panelClassName = ['saved-panels', mobileMode ? 'saved-panels--mobile' : ''].filter(Boolean).join(' ');
+
+  const submitButton = (
+    <button
+      type="button"
+      className="btn-submit-all"
+      id="applyAllBtn"
+      onClick={onApplyToSelected}
+      disabled={applyButtonDisabled}
+    >
+      {applyButtonLabel}
+    </button>
   );
 
-  useEffect(() => {
-    let hideTimer: ReturnType<typeof setTimeout> | undefined;
-    let finishTimer: ReturnType<typeof setTimeout> | undefined;
-
-    if (homeRequirement.ready) {
-      setBannerPhase('visible');
-      hideTimer = setTimeout(() => setBannerPhase('hiding'), 1000);
-      finishTimer = setTimeout(() => setBannerPhase('hidden'), 1400);
-    } else {
-      setBannerPhase('visible');
-    }
-
-    return () => {
-      if (hideTimer) {
-        clearTimeout(hideTimer);
-      }
-      if (finishTimer) {
-        clearTimeout(finishTimer);
-      }
-    };
-  }, [homeRequirement.ready, homeRequirement.text]);
-
-  const applyButtonTooltip = applyButtonDisabled && homeRequirement.blocking ? homeRequirement.tooltip : undefined;
-  const bannerClasses = [
-    'home-requirement-banner',
-    homeRequirement.ready ? 'met' : '',
-    bannerPhase === 'hiding' ? 'hiding' : '',
-    bannerPhase === 'hidden' ? 'hidden' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const submitButtonWithTooltip = <Tooltip content={applyButtonTooltip}>{submitButton}</Tooltip>;
+  const submitSection = mobileMode ? <div className="saved-panels__mobile-submit">{submitButtonWithTooltip}</div> : submitButtonWithTooltip;
 
   return (
-    <>
-      <div className="sidebar-tabs">
-        <button type="button" className={`tab ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => onTabChange('favorites')}>
-          Favorites
-          <span className="tab-count" id="favoritesCount">
-            {favoritesCount}
-          </span>
-        </button>
-        <button type="button" className={`tab ${activeTab === 'applications' ? 'active' : ''}`} onClick={() => onTabChange('applications')}>
-          Applied
-          <span className="tab-count" id="applicationsCount">
-            {applicationsCount}
-          </span>
-        </button>
-      </div>
+    <div className={panelClassName}>
+      {showTabs ? (
+        <div className="sidebar-tabs">
+          <button type="button" className={`tab ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => onTabChange('favorites')}>
+            Favorites
+            <span className="tab-count" id="favoritesCount">
+              {favoritesCount}
+            </span>
+          </button>
+          <button type="button" className={`tab ${activeTab === 'applications' ? 'active' : ''}`} onClick={() => onTabChange('applications')}>
+            Applied
+            <span className="tab-count" id="applicationsCount">
+              {applicationsCount}
+            </span>
+          </button>
+        </div>
+      ) : showMobileHeading ? (
+        <div className="saved-panels__mobile-heading">
+          <div className="saved-panels__mobile-heading-text">
+            <span className="saved-panels__mobile-eyebrow">Saved</span>
+            <h2 className="saved-panels__mobile-title">{activeHeading}</h2>
+          </div>
+          <span className="saved-panels__mobile-count">{activeHeadingCount}</span>
+        </div>
+      ) : null}
 
       <div id="favoritesTab" className="tab-content" style={{ display: activeTab === 'favorites' ? 'block' : 'none' }}>
         <div
+          className="saved-controls"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -230,17 +234,7 @@ export const SavedPanels = ({
           )}
         </div>
 
-        <Tooltip content={applyButtonTooltip}>
-          <button
-            type="button"
-            className="btn-submit-all"
-            id="applyAllBtn"
-            onClick={onApplyToSelected}
-            disabled={applyButtonDisabled}
-          >
-            {applyButtonLabel}
-          </button>
-        </Tooltip>
+        {submitSection}
       </div>
 
       <div id="applicationsTab" className="tab-content" style={{ display: activeTab === 'applications' ? 'block' : 'none' }}>
@@ -287,6 +281,6 @@ export const SavedPanels = ({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };

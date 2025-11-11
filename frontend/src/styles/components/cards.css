@@ -178,14 +178,9 @@
 
         .results-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: var(--results-header-spacing);
-        }
-
-        .results-count {
-            font-size: 14px;
-            color: #666;
         }
 
         .sort-control {
@@ -308,9 +303,9 @@
         }
 
         .company-logo {
-            width: 34px;
-            height: 34px;
-            background: #f0f0f0;
+            width: 40px;
+            height: 40px;
+            background: #f5f5f5;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -319,6 +314,28 @@
             color: #666;
             font-size: 12px;
             flex-shrink: 0;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            padding: 4px;
+            border-radius: inherit;
+            background: transparent;
+        }
+
+        .company-logo span {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #666;
         }
 
         .card-content {
@@ -400,10 +417,10 @@
         }
 
         .card-title {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 2px;
-            line-height: 1.3;
+            margin-bottom: 4px;
+            line-height: 1.35;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -412,9 +429,9 @@
         }
 
         .card-company {
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 6px;
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 8px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -424,8 +441,8 @@
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            font-size: 11px;
-            color: #999;
+            font-size: 12px;
+            color: #777;
         }
 
         .meta-item {
@@ -495,5 +512,24 @@
             background: #f8f8f8;
             border-color: #999;
             color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .results-header {
+                width: 100%;
+            }
+
+            .results-header .sort-control {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            .results-header .sort-menu {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                width: min(120px, calc(100vw - 32px));
+            }
         }
 

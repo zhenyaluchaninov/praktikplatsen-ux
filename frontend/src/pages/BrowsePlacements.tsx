@@ -1,16 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { BottomSheet } from '../components/BottomSheet';
-import { FiltersModal } from '../components/FiltersModal';
+import { FiltersContent } from '../components/FiltersContent';
 import { FiltersSidebar } from '../components/FiltersSidebar';
 import { Header } from '../components/Header';
+import { MobileViewBar, type MobileView } from '../components/MobileViewBar';
 import { ModalPlacementDetails } from '../components/ModalPlacementDetails';
 import { NotificationToast } from '../components/NotificationToast';
 import { PlacementsGrid } from '../components/PlacementsGrid';
 import { ProgressBar } from '../components/ProgressBar';
 import { RightSidebar } from '../components/RightSidebar';
-import { SortControl } from '../components/SortControl';
+import { SavedPanels } from '../components/SavedPanels';
 import { usePlacements } from '../hooks/usePlacements';
+
+type MobileExploreMode = 'list' | 'search' | 'filters';
 
 const BrowsePlacements = () => {
   const {
@@ -50,10 +52,13 @@ const BrowsePlacements = () => {
   } = usePlacements();
 
   const [isMobile, setIsMobile] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [mobileExploreMode, setMobileExploreMode] = useState<MobileExploreMode>('list');
   const [headerHidden, setHeaderHidden] = useState(false);
+  const [mobileView, setMobileView] = useState<MobileView>('explore');
   const headerRef = useRef<HTMLElement | null>(null);
   const stickyStackRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const isMobileExplore = isMobile && mobileView === 'explore';
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -106,6 +111,13 @@ const BrowsePlacements = () => {
     return () => window.removeEventListener('resize', updateMeasurements);
   }, [isMobile, headerHidden]);
 
+  useEffect(() => {
+    if (!isMobileExplore) {
+      searchInputRef.current?.blur();
+      setMobileExploreMode('list');
+    }
+  }, [isMobileExplore]);
+
   const activeFiltersCount = useMemo(
     () =>
       filterGroups.reduce(
@@ -115,8 +127,73 @@ const BrowsePlacements = () => {
     [filterGroups],
   );
 
-  const openFilters = () => setFiltersOpen(true);
-  const closeFilters = () => setFiltersOpen(false);
+  const enterMobileSearch = () => {
+    if (!isMobileExplore) {
+      return;
+    }
+    setMobileExploreMode('search');
+  };
+
+  const exitMobileSearch = () => {
+    setMobileExploreMode('list');
+  };
+
+  const openMobileFilters = () => {
+    if (!isMobileExplore) {
+      return;
+    }
+    searchInputRef.current?.blur();
+    setMobileExploreMode('filters');
+  };
+
+  const closeMobileFilters = () => {
+    searchInputRef.current?.blur();
+    exitMobileSearch();
+  };
+
+  const handleSearchFocus = () => {
+    enterMobileSearch();
+  };
+
+  const handleSearchBlur = () => {
+    requestAnimationFrame(() => {
+      if (document.activeElement !== searchInputRef.current) {
+        exitMobileSearch();
+      }
+    });
+  };
+
+  const handleSearchCancel = () => {
+    onSearchChange('');
+    searchInputRef.current?.blur();
+    exitMobileSearch();
+  };
+
+  const handleMobileViewChange = useCallback(
+    (view: MobileView) => {
+      setMobileView(view);
+      if (!isMobile) {
+        return;
+      }
+      if (view === 'wishlist' && activeTab !== 'favorites') {
+        setActiveTab('favorites');
+      } else if (view === 'applied' && activeTab !== 'applications') {
+        setActiveTab('applications');
+      }
+    },
+    [activeTab, isMobile, setActiveTab],
+  );
+
+  useEffect(() => {
+    if (!isMobile && mobileView !== 'explore') {
+      setMobileView('explore');
+    }
+  }, [isMobile, mobileView]);
+
+  const showMobileSearchPanel = isMobileExplore && mobileExploreMode !== 'filters';
+  const showMobileFiltersPanel = isMobileExplore && mobileExploreMode === 'filters';
+  const showPlacementsGrid = !isMobile || (isMobileExplore && mobileExploreMode !== 'filters');
+  const isSearchMode = isMobileExplore && mobileExploreMode === 'search';
 
   return (
     <>
@@ -128,20 +205,49 @@ const BrowsePlacements = () => {
             percentage={progress.percentage}
             weekLabel={progress.week}
           />
-          {isMobile && (
-            <div className="mobile-toolbar">
-              <button type="button" className="mobile-toolbar__filter" onClick={openFilters}>
-                <span className="mobile-toolbar__filter-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 6h16" />
-                    <path d="M7 12h10" />
-                    <path d="M10 18h4" />
+          {showMobileSearchPanel && (
+            <div className={`mobile-search-panel ${isSearchMode ? 'mobile-search-panel--focused' : ''}`}>
+              <div className="mobile-search-panel__field">
+                <span className="mobile-search-panel__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="16.65" y1="16.65" x2="21" y2="21" />
                   </svg>
                 </span>
-                <span className="mobile-toolbar__filter-label">Filters</span>
-                {activeFiltersCount > 0 && <span className="mobile-toolbar__badge">{activeFiltersCount}</span>}
-              </button>
-              <SortControl sortOption={sortOption} onSortChange={onSortChange} triggerLabel="Sort" className="mobile-toolbar__sort" />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  className="mobile-search-panel__input"
+                  placeholder="Search placements"
+                  aria-label="Search placements"
+                  value={searchValue}
+                  onChange={(event) => onSearchChange(event.target.value)}
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                  enterKeyHint="search"
+                />
+                {isSearchMode && (
+                  <button type="button" className="mobile-search-panel__cancel" onClick={handleSearchCancel} aria-label="Exit search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                      <line x1="6" y1="18" x2="18" y2="6" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {!isSearchMode && (
+                <button type="button" className="mobile-search-panel__filters" onClick={openMobileFilters}>
+                  <span className="mobile-search-panel__filter-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 6h16" />
+                      <path d="M7 12h10" />
+                      <path d="M10 18h4" />
+                    </svg>
+                  </span>
+                  <span className="mobile-search-panel__filter-label">Filters</span>
+                  {activeFiltersCount > 0 && <span className="mobile-search-panel__badge">{activeFiltersCount}</span>}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -156,16 +262,83 @@ const BrowsePlacements = () => {
             onClearFilters={onClearFilters}
           />
         )}
-        <PlacementsGrid
-          placements={placements}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
-          onShowDetails={openModal}
-          resultsLabel={resultsLabel}
-          sortOption={sortOption}
-          onSortChange={onSortChange}
-          searchValue={searchValue}
-        />
+        {showPlacementsGrid && (
+          <PlacementsGrid
+            placements={placements}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            onShowDetails={openModal}
+            resultsLabel={resultsLabel}
+            sortOption={sortOption}
+            onSortChange={onSortChange}
+            searchValue={searchValue}
+          />
+        )}
+        {showMobileFiltersPanel && (
+          <section className="mobile-filters-panel" aria-label="Filters">
+            <header className="mobile-filters-panel__header">
+              <div className="mobile-filters-panel__title">
+                Filters
+                {activeFiltersCount > 0 && <span className="mobile-filters-panel__count">{activeFiltersCount}</span>}
+              </div>
+              <div className="mobile-filters-panel__actions">
+                <button
+                  type="button"
+                  className="mobile-filters-panel__clear"
+                  onClick={onClearFilters}
+                  disabled={activeFiltersCount === 0 && searchValue.trim().length === 0}
+                >
+                  Clear
+                </button>
+                <button type="button" className="mobile-filters-panel__close" onClick={closeMobileFilters} aria-label="Close filters">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                    <line x1="6" y1="18" x2="18" y2="6" />
+                  </svg>
+                </button>
+              </div>
+            </header>
+            <div className="mobile-filters-panel__content">
+              <FiltersContent
+                groups={filterGroups}
+                searchValue={searchValue}
+                onSearchChange={onSearchChange}
+                onToggleFilter={onToggleFilter}
+                onClearFilters={onClearFilters}
+                showHeader={false}
+                showSearchInput={false}
+              />
+            </div>
+          </section>
+        )}
+        {isMobile && mobileView !== 'explore' && (
+          <section
+            className={`mobile-saved-panels mobile-saved-panels--${mobileView}`}
+            aria-label={mobileView === 'wishlist' ? 'Wishlist' : 'Applied'}
+          >
+            <SavedPanels
+              activeTab={activeTab}
+              favoritesCount={favoritesCount}
+              applicationsCount={applicationsCount}
+              favoritePlacements={favoritePlacements}
+              appliedPlacements={appliedPlacements}
+              selectedFavorites={selectedFavorites}
+              onTabChange={setActiveTab}
+              onToggleFavoriteSelection={toggleFavoriteSelection}
+              onSelectAllFavorites={selectAllFavorites}
+              onDeselectAllFavorites={deselectAllFavorites}
+              onRemoveFavorite={removeFavorite}
+              onApplyToSelected={applyToSelected}
+              onWithdrawApplication={withdrawApplication}
+              applyButtonLabel={applyButtonLabel}
+              applyButtonDisabled={applyButtonDisabled}
+              homeRequirement={homeRequirement}
+              showTabs={false}
+              showMobileHeading={false}
+              mobileMode
+            />
+          </section>
+        )}
         {!isMobile && (
           <RightSidebar
             activeTab={activeTab}
@@ -191,34 +364,17 @@ const BrowsePlacements = () => {
         <NotificationToast title={notification.title} message={notification.message} onClose={clearNotification} />
       )}
       {modalPlacement && <ModalPlacementDetails placement={modalPlacement} onClose={closeModal} />}
-      <FiltersModal
-        open={filtersOpen}
-        onClose={closeFilters}
-        groups={filterGroups}
-        searchValue={searchValue}
-        onSearchChange={onSearchChange}
-        onToggleFilter={onToggleFilter}
-        onClearFilters={onClearFilters}
-      />
-      <BottomSheet
-        enabled={isMobile}
-        activeTab={activeTab}
-        favoritesCount={favoritesCount}
-        applicationsCount={applicationsCount}
-        favoritePlacements={favoritePlacements}
-        appliedPlacements={appliedPlacements}
-        selectedFavorites={selectedFavorites}
-        onTabChange={setActiveTab}
-        onToggleFavoriteSelection={toggleFavoriteSelection}
-        onSelectAllFavorites={selectAllFavorites}
-        onDeselectAllFavorites={deselectAllFavorites}
-        onRemoveFavorite={removeFavorite}
-        onApplyToSelected={applyToSelected}
-        onWithdrawApplication={withdrawApplication}
-        applyButtonLabel={applyButtonLabel}
-        applyButtonDisabled={applyButtonDisabled}
-        homeRequirement={homeRequirement}
-      />
+      {isMobile && (
+        <MobileViewBar
+          activeView={mobileView}
+          onChange={handleMobileViewChange}
+          counts={{
+            explore: placements.length,
+            wishlist: favoritesCount,
+            applied: applicationsCount,
+          }}
+        />
+      )}
     </>
   );
 };
