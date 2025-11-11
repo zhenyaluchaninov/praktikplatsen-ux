@@ -1,0 +1,164 @@
+        /* Header */
+        .header {
+            background: white;
+            padding: var(--header-padding-y) 24px;
+            position: relative;
+            border-bottom: 1px solid #e0e0e0;
+            z-index: 2;
+        }
+
+        .sticky-stack {
+            position: sticky;
+            top: 0;
+            z-index: 120;
+            background: white;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .burger-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .burger-btn span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: #333;
+            border-radius: 1px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-tab {
+            padding: 4px 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: #666;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            border-radius: 1px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-tab:hover {
+            color: #333;
+        }
+
+        .nav-tab.active {
+            color: #FF9933;
+            border-bottom-color: #FF9933;
+            font-weight: 600;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo span:first-child {
+            color: #333;
+        }
+
+        .logo span:last-child {
+            color: #FF9933;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .sticky-panels {
+            background: white;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .progress-content {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-count {
+            font-weight: 700;
+            color: #FF9933;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9933, #FFB366);
+            transition: width 0.3s ease;
+        }
+
+        .progress-requirements {
+            display: none;
+        }
+
+        .mobile-toolbar {
+            display: none;
+        }
+

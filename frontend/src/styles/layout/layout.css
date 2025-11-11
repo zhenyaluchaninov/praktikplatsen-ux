@@ -1,0 +1,158 @@
+        /* Main Layout */
+        .main-container {
+            max-width: 1650px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr) 360px;
+            gap: clamp(24px, 2.5vw, 48px);
+            padding: var(--main-padding-block) 24px;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 1400px) {
+            .main-container {
+                grid-template-columns: 260px minmax(0, 1fr) 340px;
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 60px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .burger-btn {
+                display: flex;
+            }
+
+            .nav-tabs,
+            .user-name {
+                display: none;
+            }
+
+            .progress-section {
+                padding: 12px 16px;
+                border-bottom: none;
+            }
+
+            .mobile-toolbar {
+                display: flex;
+                gap: 12px;
+                padding: 10px 16px 12px;
+                background: #fff;
+                margin-top: -1px;
+                box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+            }
+
+            .mobile-toolbar__filter {
+                flex: 0 0 auto;
+                border-radius: 999px;
+                border: 1px solid #ddd;
+                background: #fff;
+                padding: 8px 16px;
+                font-weight: 500;
+                color: #666;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-width: 120px;
+            }
+
+            .mobile-toolbar__filter-icon svg {
+                width: 18px;
+                height: 18px;
+                stroke: currentColor;
+            }
+
+            .mobile-toolbar__filter-label {
+                font-size: 14px;
+            }
+
+            .mobile-toolbar__badge {
+                background: #FF9933;
+                color: #fff;
+                font-size: 12px;
+                padding: 0 8px;
+                border-radius: 999px;
+                line-height: 20px;
+            }
+
+            .sort-control.mobile-toolbar__sort {
+                flex: 1;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .mobile-toolbar__sort .sort-trigger {
+                width: auto;
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                background: transparent;
+                color: #777;
+                font-weight: 500;
+                gap: 6px;
+            }
+
+            .mobile-toolbar__sort .sort-trigger svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            body.sheet-open .mobile-toolbar {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            .main-container {
+                display: block;
+                padding: 12px 16px 140px;
+                grid-template-columns: none;
+            }
+
+            .results-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .results-header .sort-control {
+                display: none;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .placement-card {
+                padding: 16px;
+            }
+
+            .filters-sidebar,
+            .right-sidebar {
+                display: none;
+            }
+
+            .bottom-sheet__content {
+                padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+            }
+
+            .bottom-sheet {
+                height: calc(100vh - var(--mobile-progress-visible-height));
+                max-height: none;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .bottom-sheet,
+            .bottom-sheet-backdrop {
+                display: none !important;
+            }
+        }
+
