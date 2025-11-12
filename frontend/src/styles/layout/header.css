@@ -155,6 +155,16 @@
             transition: width 0.3s ease;
         }
 
+        .progress-section--complete .progress-count,
+        .progress-count--complete {
+            color: #2E7D32;
+        }
+
+        .progress-section--complete .progress-fill,
+        .progress-fill--complete {
+            background: linear-gradient(90deg, #43A047, #2E7D32);
+        }
+
         .progress-requirements {
             display: none;
         }

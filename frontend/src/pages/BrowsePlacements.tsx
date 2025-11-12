@@ -24,6 +24,8 @@ const BrowsePlacements = () => {
     activeTab,
     setActiveTab,
     notification,
+    exitingNotification,
+    notificationVisible,
     clearNotification,
     toggleWishlist,
     toggleWishlistSelection,
@@ -203,6 +205,7 @@ const BrowsePlacements = () => {
               countText={progress.count}
               percentage={progress.percentage}
               weekLabel={progress.week}
+              complete={progress.complete}
             />
             {showMobileSearchPanel && (
               <div className={`mobile-search-panel ${isSearchMode ? 'mobile-search-panel--focused' : ''}`}>
@@ -361,8 +364,23 @@ const BrowsePlacements = () => {
           )}
         </div>
 
+        {exitingNotification && (
+          <NotificationToast
+            key={`exiting-${exitingNotification.id}`}
+            title={exitingNotification.title}
+            message={exitingNotification.message}
+            onClose={clearNotification}
+            visible={false}
+          />
+        )}
         {notification && (
-          <NotificationToast title={notification.title} message={notification.message} onClose={clearNotification} />
+          <NotificationToast
+            key={notification.id}
+            title={notification.title}
+            message={notification.message}
+            onClose={clearNotification}
+            visible={notificationVisible}
+          />
         )}
         {modalPlacement && <ModalPlacementDetails placement={modalPlacement} onClose={closeModal} />}
       </div>
