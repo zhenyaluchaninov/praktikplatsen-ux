@@ -150,14 +150,14 @@
         }
 
         .tab.active .tab-count {
-            background: #FFE5CC;
-            color: #FF9933;
+            background: #FF9933;
+            color: #ffffff;
         }
 
         .saved-panels {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 0px;
         }
 
         .saved-panels--mobile {

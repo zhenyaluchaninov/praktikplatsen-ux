@@ -2,10 +2,15 @@ interface NotificationToastProps {
   title: string;
   message: string;
   onClose: () => void;
+  visible: boolean;
 }
 
-export const NotificationToast = ({ title, message, onClose }: NotificationToastProps) => (
-  <div className="notification-toast" role="status" onClick={onClose}>
+export const NotificationToast = ({ title, message, onClose, visible }: NotificationToastProps) => (
+  <div
+    className={`notification-toast${visible ? '' : ' notification-toast--hidden'}`}
+    role="status"
+    onClick={onClose}
+  >
     <div className="notification-icon">
       <svg
         width="24"
@@ -26,4 +31,3 @@ export const NotificationToast = ({ title, message, onClose }: NotificationToast
     </div>
   </div>
 );
-

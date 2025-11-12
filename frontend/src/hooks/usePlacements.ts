@@ -200,7 +200,7 @@ export const usePlacements = () => {
     removeWishlistItems,
   } = useWishlist(INITIAL_WISHLIST);
 
-  const { notification, showNotification, clearNotification } = useNotifications();
+  const { notification, exitingNotification, isNotificationVisible, showNotification, clearNotification } = useNotifications();
 
   const [applications, setApplications] = useState<number[]>(INITIAL_APPLICATIONS);
   const [activeTab, setActiveTab] = useState<'wishlist' | 'applications'>('wishlist');
@@ -532,6 +532,7 @@ export const usePlacements = () => {
   const progressCount = `${applications.length}/${APPLICATION_LIMIT}`;
   const progressPercentage = Math.min(100, (applications.length / APPLICATION_LIMIT) * 100);
   const canApplyMore = applications.length < APPLICATION_LIMIT;
+  const progressComplete = !canApplyMore;
   const applyButtonLabel = `Apply to Selected (${selectedWishlist.length})`;
   const applyButtonDisabled = selectedWishlist.length === 0 || !canApplyMore || homeRequirementBlocking;
   const resultsLabel = `Showing ${sortedPlacements.length} ${sortedPlacements.length === 1 ? 'placement' : 'placements'}`;
@@ -546,6 +547,8 @@ export const usePlacements = () => {
     activeTab,
     setActiveTab,
     notification,
+    exitingNotification,
+    notificationVisible: isNotificationVisible,
     clearNotification,
     toggleWishlist,
     toggleWishlistSelection,
@@ -562,6 +565,7 @@ export const usePlacements = () => {
       count: progressCount,
       percentage: progressPercentage,
       week: 'Week: 34-37, 2025',
+      complete: progressComplete,
     },
     homeRequirement: {
       met: homeRequirementMet,
