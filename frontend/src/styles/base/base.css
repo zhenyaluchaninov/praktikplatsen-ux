@@ -18,6 +18,11 @@
             overflow: hidden;
         }
 
+        body.modal-open .app-scroll,
+        body.menu-open .app-scroll {
+            overflow: hidden;
+        }
+
         body.header-collapsed .sticky-stack {
             transform: translateY(calc(-1 * var(--header-height)));
         }
@@ -28,6 +33,7 @@
             --cards-section-gap: 0px;
             --results-header-spacing: 8px;
             --header-height: 72px;
+            --header-offset: 0px;
             --mobile-progress-visible-height: 150px;
             --sticky-stack-offset: 160px;
             --filters-top-gap: 0px;
@@ -59,4 +65,12 @@
             outline: 2px solid var(--focus-ring-color, #ffb74d);
             outline-offset: 3px;
             border-radius: 6px;
+        }
+
+        @media (max-width: 768px) {
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
         }

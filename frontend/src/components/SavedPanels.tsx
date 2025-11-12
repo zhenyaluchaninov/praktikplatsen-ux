@@ -11,17 +11,17 @@ export type HomeRequirementState = {
 };
 
 export type SavedPanelsProps = {
-  activeTab: 'favorites' | 'applications';
-  favoritesCount: number;
+  activeTab: 'wishlist' | 'applications';
+  wishlistCount: number;
   applicationsCount: number;
-  favoritePlacements: Placement[];
+  wishlistPlacements: Placement[];
   appliedPlacements: Placement[];
-  selectedFavorites: number[];
-  onTabChange: (tab: 'favorites' | 'applications') => void;
-  onToggleFavoriteSelection: (id: number) => void;
-  onSelectAllFavorites: () => void;
-  onDeselectAllFavorites: () => void;
-  onRemoveFavorite: (id: number) => void;
+  selectedWishlist: number[];
+  onTabChange: (tab: 'wishlist' | 'applications') => void;
+  onToggleWishlistSelection: (id: number) => void;
+  onSelectAllWishlist: () => void;
+  onDeselectAllWishlist: () => void;
+  onRemoveWishlist: (id: number) => void;
   onApplyToSelected: () => void;
   onWithdrawApplication: (id: number) => void;
   applyButtonLabel: string;
@@ -33,14 +33,14 @@ export type SavedPanelsProps = {
   mobileMode?: boolean;
 };
 
-const EmptyFavoriteState = () => (
+const EmptyWishlistState = () => (
   <div className="empty-state">
     <div className="empty-state-icon">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
       </svg>
     </div>
-    <p>No favorites yet</p>
+    <p>No wishlist yet</p>
     <p style={{ fontSize: '12px', marginTop: '8px' }}>Click the heart icon on placements to save them here</p>
   </div>
 );
@@ -57,22 +57,22 @@ const EmptyApplicationsState = () => (
       </svg>
     </div>
     <p>No applications yet</p>
-    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select favorites and click &quot;Apply to Selected&quot;</p>
+    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select wishlist placements and click &quot;Apply to Selected&quot;</p>
   </div>
 );
 
 export const SavedPanels = ({
   activeTab,
-  favoritesCount,
+  wishlistCount,
   applicationsCount,
-  favoritePlacements,
+  wishlistPlacements,
   appliedPlacements,
-  selectedFavorites,
+  selectedWishlist,
   onTabChange,
-  onToggleFavoriteSelection,
-  onSelectAllFavorites,
-  onDeselectAllFavorites,
-  onRemoveFavorite,
+  onToggleWishlistSelection,
+  onSelectAllWishlist,
+  onDeselectAllWishlist,
+  onRemoveWishlist,
   onApplyToSelected,
   onWithdrawApplication,
   applyButtonLabel,
@@ -83,13 +83,13 @@ export const SavedPanels = ({
   showMobileHeading = true,
   mobileMode = false,
 }: SavedPanelsProps) => {
-  const favoritesEmpty = favoritePlacements.length === 0;
+  const wishlistEmpty = wishlistPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
   const applyButtonTooltip = applyButtonDisabled && homeRequirement.blocking ? homeRequirement.tooltip : undefined;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
 
-  const activeHeading = heading ?? (activeTab === 'favorites' ? 'Wishlist' : 'Applied');
-  const activeHeadingCount = activeTab === 'favorites' ? favoritesCount : applicationsCount;
+  const activeHeading = heading ?? (activeTab === 'wishlist' ? 'Wishlist' : 'Applied');
+  const activeHeadingCount = activeTab === 'wishlist' ? wishlistCount : applicationsCount;
 
   const panelClassName = ['saved-panels', mobileMode ? 'saved-panels--mobile' : ''].filter(Boolean).join(' ');
 
@@ -112,10 +112,10 @@ export const SavedPanels = ({
     <div className={panelClassName}>
       {showTabs ? (
         <div className="sidebar-tabs">
-          <button type="button" className={`tab ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => onTabChange('favorites')}>
-            Favorites
-            <span className="tab-count" id="favoritesCount">
-              {favoritesCount}
+          <button type="button" className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`} onClick={() => onTabChange('wishlist')}>
+            Wishlist
+            <span className="tab-count" id="wishlistCount">
+              {wishlistCount}
             </span>
           </button>
           <button type="button" className={`tab ${activeTab === 'applications' ? 'active' : ''}`} onClick={() => onTabChange('applications')}>
@@ -135,7 +135,7 @@ export const SavedPanels = ({
         </div>
       ) : null}
 
-      <div id="favoritesTab" className="tab-content" style={{ display: activeTab === 'favorites' ? 'block' : 'none' }}>
+      <div id="wishlistTab" className="tab-content" style={{ display: activeTab === 'wishlist' ? 'block' : 'none' }}>
         <div
           className="saved-controls"
           style={{
@@ -151,7 +151,7 @@ export const SavedPanels = ({
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               type="button"
-              onClick={onSelectAllFavorites}
+              onClick={onSelectAllWishlist}
               style={{
                 background: 'none',
                 border: 'none',
@@ -165,7 +165,7 @@ export const SavedPanels = ({
             </button>
             <button
               type="button"
-              onClick={onDeselectAllFavorites}
+              onClick={onDeselectAllWishlist}
               style={{
                 background: 'none',
                 border: 'none',
@@ -193,22 +193,22 @@ export const SavedPanels = ({
           </div>
         </Tooltip>
 
-        <div className="saved-list" id="favoritesList">
-          {favoritesEmpty ? (
-            <EmptyFavoriteState />
+        <div className="saved-list" id="wishlistList">
+          {wishlistEmpty ? (
+            <EmptyWishlistState />
           ) : (
-            favoritePlacements.map((placement) => {
-              const isSelected = selectedFavorites.includes(placement.id);
+            wishlistPlacements.map((placement) => {
+              const isSelected = selectedWishlist.includes(placement.id);
               return (
                 <div className={`saved-item ${isSelected ? 'selected' : ''}`} key={placement.id}>
                   <input
                     type="checkbox"
                     className="saved-item-checkbox"
-                    id={`fav-${placement.id}`}
+                    id={`wish-${placement.id}`}
                     checked={isSelected}
-                    onChange={() => onToggleFavoriteSelection(placement.id)}
+                    onChange={() => onToggleWishlistSelection(placement.id)}
                   />
-                  <label htmlFor={`fav-${placement.id}`} className="saved-item-info" style={{ cursor: 'pointer' }}>
+                  <label htmlFor={`wish-${placement.id}`} className="saved-item-info" style={{ cursor: 'pointer' }}>
                     <div className="saved-item-title">{placement.title}</div>
                     <div className="saved-item-company">{placement.company}</div>
                   </label>
@@ -216,10 +216,10 @@ export const SavedPanels = ({
                     <button
                       type="button"
                       className="icon-btn"
-                      title="Remove from favorites"
+                      title="Remove from wishlist"
                       onClick={(event) => {
                         event.stopPropagation();
-                        onRemoveFavorite(placement.id);
+                        onRemoveWishlist(placement.id);
                       }}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

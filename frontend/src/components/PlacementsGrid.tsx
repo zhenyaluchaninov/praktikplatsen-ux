@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import type { SortOption } from '../hooks/usePlacements';
 import type { Placement } from '../types/placement';
@@ -7,8 +7,8 @@ import { SortControl } from './SortControl';
 
 interface PlacementsGridProps {
   placements: Placement[];
-  favorites: number[];
-  onToggleFavorite: (id: number) => void;
+  wishlist: number[];
+  onToggleWishlist: (id: number) => void;
   onShowDetails: (id: number) => void;
   resultsLabel: string;
   sortOption: SortOption;
@@ -135,25 +135,20 @@ const LogoImage = ({ placement }: { placement: Placement }) => {
 
 export const PlacementsGrid = ({
   placements,
-  favorites,
-  onToggleFavorite,
+  wishlist,
+  onToggleWishlist,
   onShowDetails,
   resultsLabel,
   sortOption,
   onSortChange,
   searchValue,
 }: PlacementsGridProps) => {
-  const handleCardClick = (id: number) => (event: ReactMouseEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLElement;
-    if (target.closest('button')) {
-      return;
-    }
-    onShowDetails(id);
-  };
-
   return (
     <main className="cards-section">
       <div className="results-header">
+        <p className="results-label" aria-hidden="true">
+          {resultsLabel}
+        </p>
         <SortControl sortOption={sortOption} onSortChange={onSortChange} triggerLabel="Sort" />
         <span className="sr-only" role="status" aria-live="polite" id="resultsCount">
           {resultsLabel}
@@ -162,9 +157,9 @@ export const PlacementsGrid = ({
 
       <div className="cards-grid" id="cardsGrid">
         {placements.map((placement) => {
-          const isFavorited = favorites.includes(placement.id);
+          const isWishlisted = wishlist.includes(placement.id);
           return (
-            <div className="placement-card" key={placement.id} onClick={handleCardClick(placement.id)}>
+            <div className="placement-card" key={placement.id}>
               <div className="card-header">
                 <div className="company-logo">
                   <LogoImage placement={placement} />
@@ -176,17 +171,14 @@ export const PlacementsGrid = ({
                 <div className="card-actions">
                   <button
                     type="button"
-                    className={`icon-btn ${isFavorited ? 'favorited' : ''}`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onToggleFavorite(placement.id);
-                    }}
-                    title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                    className={`icon-btn ${isWishlisted ? 'wishlisted' : ''}`}
+                    onClick={() => onToggleWishlist(placement.id)}
+                    title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                   >
                     <svg
                       className="heart-icon"
                       viewBox="0 0 24 24"
-                      fill={isFavorited ? 'currentColor' : 'none'}
+                      fill={isWishlisted ? 'currentColor' : 'none'}
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
@@ -246,14 +238,7 @@ export const PlacementsGrid = ({
                 )}
               </div>
               <div className="card-footer">
-                <button
-                  type="button"
-                  className="btn-details"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onShowDetails(placement.id);
-                  }}
-                >
+                <button type="button" className="btn-details" onClick={() => onShowDetails(placement.id)}>
                   <svg
                     style={{
                       width: '14px',

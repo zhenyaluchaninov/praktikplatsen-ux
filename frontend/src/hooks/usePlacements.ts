@@ -1,8 +1,8 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import placementsData from '../data/placements.json';
 import type { Placement } from '../types/placement';
-import { useFavorites } from './useFavorites';
+import { useWishlist } from './useWishlist';
 import { useNotifications } from './useNotifications';
 
 const APPLICATION_LIMIT = 10;
@@ -30,7 +30,7 @@ type FilterGroupView = {
 
 const placementsFromJson = placementsData as Placement[];
 
-const INITIAL_FAVORITES: number[] = [];
+const INITIAL_WISHLIST: number[] = [];
 const INITIAL_APPLICATIONS: number[] = [];
 
 const FILTER_GROUPS: FilterGroupId[] = ['industry', 'municipality', 'type', 'availability'];
@@ -190,20 +190,20 @@ const sortPlacements = (placements: Placement[], sortOption: SortOption) => {
 
 export const usePlacements = () => {
   const {
-    favorites,
-    selectedFavorites,
-    toggleFavorite: toggleFavoriteState,
-    toggleFavoriteSelection,
-    selectAllFavorites,
-    deselectAllFavorites,
-    removeFavorite: removeFavoriteState,
-    removeFavorites,
-  } = useFavorites(INITIAL_FAVORITES);
+    wishlist,
+    selectedWishlist,
+    toggleWishlistItem: toggleWishlistState,
+    toggleWishlistSelection,
+    selectAllWishlist,
+    deselectAllWishlist,
+    removeWishlistItem: removeWishlistState,
+    removeWishlistItems,
+  } = useWishlist(INITIAL_WISHLIST);
 
   const { notification, showNotification, clearNotification } = useNotifications();
 
   const [applications, setApplications] = useState<number[]>(INITIAL_APPLICATIONS);
-  const [activeTab, setActiveTab] = useState<'favorites' | 'applications'>('favorites');
+  const [activeTab, setActiveTab] = useState<'wishlist' | 'applications'>('wishlist');
   const [modalPlacementId, setModalPlacementId] = useState<number | null>(null);
   const [allPlacements, setAllPlacements] = useState<Placement[]>([]);
   const [filters, setFilters] = useState<FiltersState>(() => createEmptyFilters());
@@ -365,12 +365,12 @@ export const usePlacements = () => {
     typeFilterOptions,
   ]);
 
-  const favoritePlacements = useMemo(
+  const wishlistPlacements = useMemo(
     () =>
-      favorites
+      wishlist
         .map((id) => placementsById.get(id))
         .filter((placement): placement is Placement => Boolean(placement)),
-    [favorites, placementsById],
+    [wishlist, placementsById],
   );
 
   const appliedPlacements = useMemo(
@@ -386,42 +386,42 @@ export const usePlacements = () => {
     [appliedPlacements],
   );
 
-  const selectedFavoritesHomeCount = useMemo(
-    () => selectedFavorites.reduce((count, id) => count + (placementsById.get(id)?.homeArea ? 1 : 0), 0),
-    [selectedFavorites, placementsById],
+  const selectedWishlistHomeCount = useMemo(
+    () => selectedWishlist.reduce((count, id) => count + (placementsById.get(id)?.homeArea ? 1 : 0), 0),
+    [selectedWishlist, placementsById],
   );
 
   const homeRequirementMet = homeApplicationsCount >= HOME_MUNICIPALITY_REQUIREMENT;
   const homeRequirementSatisfiedAfterSelection =
-    homeRequirementMet || homeApplicationsCount + selectedFavoritesHomeCount >= HOME_MUNICIPALITY_REQUIREMENT;
+    homeRequirementMet || homeApplicationsCount + selectedWishlistHomeCount >= HOME_MUNICIPALITY_REQUIREMENT;
   const homeRequirementBlocking = !homeRequirementSatisfiedAfterSelection;
   const homeRequirementDisplayCount = Math.min(
-    homeApplicationsCount + selectedFavoritesHomeCount,
+    homeApplicationsCount + selectedWishlistHomeCount,
     HOME_MUNICIPALITY_REQUIREMENT,
   );
   const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_MUNICIPALITY_REQUIREMENT}`;
 
-  const toggleFavorite = useCallback(
+  const toggleWishlist = useCallback(
     (id: number) => {
-      const isCurrentlyFavorite = favorites.includes(id);
-      toggleFavoriteState(id);
+      const isCurrentlyWishlist = wishlist.includes(id);
+      toggleWishlistState(id);
       showNotification(
-        isCurrentlyFavorite ? 'Removed from favorites' : 'Added to favorites',
-        isCurrentlyFavorite ? '' : 'Check the box to select it for application',
+        isCurrentlyWishlist ? 'Removed from wishlist' : 'Added to wishlist',
+        isCurrentlyWishlist ? '' : 'Check the box to select it for application',
       );
     },
-    [favorites, toggleFavoriteState, showNotification],
+    [wishlist, toggleWishlistState, showNotification],
   );
 
-  const removeFavorite = useCallback(
+  const removeWishlist = useCallback(
     (id: number) => {
-      if (!favorites.includes(id)) {
+      if (!wishlist.includes(id)) {
         return;
       }
-      removeFavoriteState(id);
-      showNotification('Removed from favorites', '');
+      removeWishlistState(id);
+      showNotification('Removed from wishlist', '');
     },
-    [favorites, removeFavoriteState, showNotification],
+    [wishlist, removeWishlistState, showNotification],
   );
 
   const openModal = useCallback((id: number) => {
@@ -443,12 +443,12 @@ export const usePlacements = () => {
           return prev;
         }
 
-        removeFavorites([id]);
+        removeWishlistItems([id]);
         showNotification('Application submitted!', 'You will be notified when reviewed');
         return [...prev, id];
       });
     },
-    [removeFavorites, showNotification],
+    [removeWishlistItems, showNotification],
   );
 
   const applyToSelected = useCallback(() => {
@@ -466,24 +466,24 @@ export const usePlacements = () => {
         return prev;
       }
 
-      if (selectedFavorites.length === 0) {
-        showNotification('No favorites selected', 'Check the boxes to select favorites');
+      if (selectedWishlist.length === 0) {
+        showNotification('No wishlist selected', 'Check the boxes to pick wishlist placements');
         return prev;
       }
 
       const remainingSlots = APPLICATION_LIMIT - prev.length;
-      const toApply = selectedFavorites.filter((id) => !prev.includes(id)).slice(0, remainingSlots);
+      const toApply = selectedWishlist.filter((id) => !prev.includes(id)).slice(0, remainingSlots);
 
       if (toApply.length === 0) {
-        showNotification('No favorites selected', 'Check the boxes to select favorites');
+        showNotification('No wishlist selected', 'Check the boxes to pick wishlist placements');
         return prev;
       }
 
-      removeFavorites(toApply);
+      removeWishlistItems(toApply);
       showNotification(`Applied to ${toApply.length} placements!`, 'Check "Applied" tab to see them');
       return [...prev, ...toApply];
     });
-  }, [homeRequirementSatisfiedAfterSelection, removeFavorites, selectedFavorites, showNotification]);
+  }, [homeRequirementSatisfiedAfterSelection, removeWishlistItems, selectedWishlist, showNotification]);
 
   const withdrawApplication = useCallback(
     (id: number) => {
@@ -532,26 +532,26 @@ export const usePlacements = () => {
   const progressCount = `${applications.length}/${APPLICATION_LIMIT}`;
   const progressPercentage = Math.min(100, (applications.length / APPLICATION_LIMIT) * 100);
   const canApplyMore = applications.length < APPLICATION_LIMIT;
-  const applyButtonLabel = `Apply to Selected (${selectedFavorites.length})`;
-  const applyButtonDisabled = selectedFavorites.length === 0 || !canApplyMore || homeRequirementBlocking;
+  const applyButtonLabel = `Apply to Selected (${selectedWishlist.length})`;
+  const applyButtonDisabled = selectedWishlist.length === 0 || !canApplyMore || homeRequirementBlocking;
   const resultsLabel = `Showing ${sortedPlacements.length} ${sortedPlacements.length === 1 ? 'placement' : 'placements'}`;
 
   return {
     placements: sortedPlacements,
-    favorites,
-    favoritePlacements,
+    wishlist,
+    wishlistPlacements,
     applications,
     appliedPlacements,
-    selectedFavorites,
+    selectedWishlist,
     activeTab,
     setActiveTab,
     notification,
     clearNotification,
-    toggleFavorite,
-    toggleFavoriteSelection,
-    selectAllFavorites,
-    deselectAllFavorites,
-    removeFavorite,
+    toggleWishlist,
+    toggleWishlistSelection,
+    selectAllWishlist,
+    deselectAllWishlist,
+    removeWishlist,
     applyToPlacement,
     applyToSelected,
     withdrawApplication,
@@ -572,7 +572,7 @@ export const usePlacements = () => {
       ready: !homeRequirementBlocking,
     },
     resultsLabel,
-    favoritesCount: favorites.length,
+    wishlistCount: wishlist.length,
     applicationsCount: applications.length,
     applyButtonLabel,
     applyButtonDisabled,
