@@ -53,10 +53,10 @@ const BrowsePlacements = () => {
 
   const [isMobile, setIsMobile] = useState(false);
   const [mobileExploreMode, setMobileExploreMode] = useState<MobileExploreMode>('list');
-  const [headerHidden, setHeaderHidden] = useState(false);
   const [mobileView, setMobileView] = useState<MobileView>('explore');
   const headerRef = useRef<HTMLElement | null>(null);
   const stickyStackRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const isMobileExplore = isMobile && mobileView === 'explore';
 
@@ -73,27 +73,25 @@ const BrowsePlacements = () => {
   }, []);
 
   useEffect(() => {
-    const threshold = 40;
     if (!isMobile) {
-      setHeaderHidden(false);
+      document.documentElement.style.setProperty('--header-offset', '0px');
+      return;
+    }
+    const container = scrollContainerRef.current;
+    if (!container) {
       return;
     }
     const handleScroll = () => {
-      const shouldHide = window.scrollY > threshold;
-      setHeaderHidden(shouldHide);
+      const headerHeight = headerRef.current?.offsetHeight ?? 0;
+      const offset = headerHeight > 0 ? Math.min(container.scrollTop, headerHeight) : 0;
+      document.documentElement.style.setProperty('--header-offset', `${offset}px`);
     };
     handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile]);
-
-  useEffect(() => {
-    const collapsed = isMobile && headerHidden;
-    document.body.classList.toggle('header-collapsed', collapsed);
+    container.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      document.body.classList.remove('header-collapsed');
+      container.removeEventListener('scroll', handleScroll);
     };
-  }, [headerHidden, isMobile]);
+  }, [isMobile]);
 
   useEffect(() => {
     const updateMeasurements = () => {
@@ -109,7 +107,7 @@ const BrowsePlacements = () => {
     updateMeasurements();
     window.addEventListener('resize', updateMeasurements);
     return () => window.removeEventListener('resize', updateMeasurements);
-  }, [isMobile, headerHidden]);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!isMobileExplore) {
@@ -197,126 +195,152 @@ const BrowsePlacements = () => {
 
   return (
     <>
-      <div className="sticky-stack" ref={stickyStackRef}>
-        <Header ref={headerRef} />
-        <div className="sticky-panels">
-          <ProgressBar
-            countText={progress.count}
-            percentage={progress.percentage}
-            weekLabel={progress.week}
-          />
-          {showMobileSearchPanel && (
-            <div className={`mobile-search-panel ${isSearchMode ? 'mobile-search-panel--focused' : ''}`}>
-              <div className="mobile-search-panel__field">
-                <span className="mobile-search-panel__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="16.65" y1="16.65" x2="21" y2="21" />
-                  </svg>
-                </span>
-                <input
-                  ref={searchInputRef}
-                  type="search"
-                  className="mobile-search-panel__input"
-                  placeholder="Search placements"
-                  aria-label="Search placements"
-                  value={searchValue}
-                  onChange={(event) => onSearchChange(event.target.value)}
-                  onFocus={handleSearchFocus}
-                  onBlur={handleSearchBlur}
-                  enterKeyHint="search"
-                />
-                {isSearchMode && (
-                  <button type="button" className="mobile-search-panel__cancel" onClick={handleSearchCancel} aria-label="Exit search">
+      <div className="app-scroll" ref={scrollContainerRef}>
+        <div className="sticky-stack" ref={stickyStackRef}>
+          <Header ref={headerRef} />
+          <div className="sticky-panels">
+            <ProgressBar
+              countText={progress.count}
+              percentage={progress.percentage}
+              weekLabel={progress.week}
+            />
+            {showMobileSearchPanel && (
+              <div className={`mobile-search-panel ${isSearchMode ? 'mobile-search-panel--focused' : ''}`}>
+                <div className="mobile-search-panel__field">
+                  <span className="mobile-search-panel__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="7" />
+                      <line x1="16.65" y1="16.65" x2="21" y2="21" />
+                    </svg>
+                  </span>
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    className="mobile-search-panel__input"
+                    placeholder="Search placements"
+                    aria-label="Search placements"
+                    value={searchValue}
+                    onChange={(event) => onSearchChange(event.target.value)}
+                    onFocus={handleSearchFocus}
+                    onBlur={handleSearchBlur}
+                    enterKeyHint="search"
+                  />
+                  {isSearchMode && (
+                    <button type="button" className="mobile-search-panel__cancel" onClick={handleSearchCancel} aria-label="Exit search">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="6" y1="18" x2="18" y2="6" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                {!isSearchMode && (
+                  <button type="button" className="mobile-search-panel__filters" onClick={openMobileFilters}>
+                    <span className="mobile-search-panel__filter-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 6h16" />
+                        <path d="M7 12h10" />
+                        <path d="M10 18h4" />
+                      </svg>
+                    </span>
+                    <span className="mobile-search-panel__filter-label">Filters</span>
+                    {activeFiltersCount > 0 && <span className="mobile-search-panel__badge">{activeFiltersCount}</span>}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="main-container">
+          {!isMobile && (
+            <FiltersSidebar
+              groups={filterGroups}
+              searchValue={searchValue}
+              onSearchChange={onSearchChange}
+              onToggleFilter={onToggleFilter}
+              onClearFilters={onClearFilters}
+            />
+          )}
+          {showPlacementsGrid && (
+            <PlacementsGrid
+              placements={placements}
+              wishlist={wishlist}
+              onToggleWishlist={toggleWishlist}
+              onShowDetails={openModal}
+              resultsLabel={resultsLabel}
+              sortOption={sortOption}
+              onSortChange={onSortChange}
+              searchValue={searchValue}
+            />
+          )}
+          {showMobileFiltersPanel && (
+            <section className="mobile-filters-panel" aria-label="Filters">
+              <header className="mobile-filters-panel__header">
+                <div className="mobile-filters-panel__title">
+                  Filters
+                  {activeFiltersCount > 0 && <span className="mobile-filters-panel__count">{activeFiltersCount}</span>}
+                </div>
+                <div className="mobile-filters-panel__actions">
+                  <button
+                    type="button"
+                    className="mobile-filters-panel__clear"
+                    onClick={onClearFilters}
+                    disabled={activeFiltersCount === 0 && searchValue.trim().length === 0}
+                  >
+                    Clear
+                  </button>
+                  <button type="button" className="mobile-filters-panel__close" onClick={closeMobileFilters} aria-label="Close filters">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <line x1="6" y1="6" x2="18" y2="18" />
                       <line x1="6" y1="18" x2="18" y2="6" />
                     </svg>
                   </button>
-                )}
+                </div>
+              </header>
+              <div className="mobile-filters-panel__content">
+                <FiltersContent
+                  groups={filterGroups}
+                  searchValue={searchValue}
+                  onSearchChange={onSearchChange}
+                  onToggleFilter={onToggleFilter}
+                  onClearFilters={onClearFilters}
+                  showHeader={false}
+                  showSearchInput={false}
+                />
               </div>
-              {!isSearchMode && (
-                <button type="button" className="mobile-search-panel__filters" onClick={openMobileFilters}>
-                  <span className="mobile-search-panel__filter-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 6h16" />
-                      <path d="M7 12h10" />
-                      <path d="M10 18h4" />
-                    </svg>
-                  </span>
-                  <span className="mobile-search-panel__filter-label">Filters</span>
-                  {activeFiltersCount > 0 && <span className="mobile-search-panel__badge">{activeFiltersCount}</span>}
-                </button>
-              )}
-            </div>
+            </section>
           )}
-        </div>
-      </div>
-      <div className="main-container">
-        {!isMobile && (
-          <FiltersSidebar
-            groups={filterGroups}
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            onToggleFilter={onToggleFilter}
-            onClearFilters={onClearFilters}
-          />
-        )}
-        {showPlacementsGrid && (
-          <PlacementsGrid
-            placements={placements}
-            wishlist={wishlist}
-            onToggleWishlist={toggleWishlist}
-            onShowDetails={openModal}
-            resultsLabel={resultsLabel}
-            sortOption={sortOption}
-            onSortChange={onSortChange}
-            searchValue={searchValue}
-          />
-        )}
-        {showMobileFiltersPanel && (
-          <section className="mobile-filters-panel" aria-label="Filters">
-            <header className="mobile-filters-panel__header">
-              <div className="mobile-filters-panel__title">
-                Filters
-                {activeFiltersCount > 0 && <span className="mobile-filters-panel__count">{activeFiltersCount}</span>}
-              </div>
-              <div className="mobile-filters-panel__actions">
-                <button
-                  type="button"
-                  className="mobile-filters-panel__clear"
-                  onClick={onClearFilters}
-                  disabled={activeFiltersCount === 0 && searchValue.trim().length === 0}
-                >
-                  Clear
-                </button>
-                <button type="button" className="mobile-filters-panel__close" onClick={closeMobileFilters} aria-label="Close filters">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                    <line x1="6" y1="18" x2="18" y2="6" />
-                  </svg>
-                </button>
-              </div>
-            </header>
-            <div className="mobile-filters-panel__content">
-              <FiltersContent
-                groups={filterGroups}
-                searchValue={searchValue}
-                onSearchChange={onSearchChange}
-                onToggleFilter={onToggleFilter}
-                onClearFilters={onClearFilters}
-                showHeader={false}
-                showSearchInput={false}
+          {isMobile && mobileView !== 'explore' && (
+            <section
+              className={`mobile-saved-panels mobile-saved-panels--${mobileView}`}
+              aria-label={mobileView === 'wishlist' ? 'Wishlist' : 'Applied'}
+            >
+              <SavedPanels
+                activeTab={activeTab}
+                wishlistCount={wishlistCount}
+                applicationsCount={applicationsCount}
+                wishlistPlacements={wishlistPlacements}
+                appliedPlacements={appliedPlacements}
+                selectedWishlist={selectedWishlist}
+                onTabChange={setActiveTab}
+                onToggleWishlistSelection={toggleWishlistSelection}
+                onSelectAllWishlist={selectAllWishlist}
+                onDeselectAllWishlist={deselectAllWishlist}
+                onRemoveWishlist={removeWishlist}
+                onApplyToSelected={applyToSelected}
+                onWithdrawApplication={withdrawApplication}
+                applyButtonLabel={applyButtonLabel}
+                applyButtonDisabled={applyButtonDisabled}
+                homeRequirement={homeRequirement}
+                showTabs={false}
+                showMobileHeading={false}
+                mobileMode
               />
-            </div>
-          </section>
-        )}
-        {isMobile && mobileView !== 'explore' && (
-          <section
-            className={`mobile-saved-panels mobile-saved-panels--${mobileView}`}
-            aria-label={mobileView === 'wishlist' ? 'Wishlist' : 'Applied'}
-          >
-            <SavedPanels
+            </section>
+          )}
+          {!isMobile && (
+            <RightSidebar
               activeTab={activeTab}
               wishlistCount={wishlistCount}
               applicationsCount={applicationsCount}
@@ -333,37 +357,15 @@ const BrowsePlacements = () => {
               applyButtonLabel={applyButtonLabel}
               applyButtonDisabled={applyButtonDisabled}
               homeRequirement={homeRequirement}
-              showTabs={false}
-              showMobileHeading={false}
-              mobileMode
             />
-          </section>
+          )}
+        </div>
+
+        {notification && (
+          <NotificationToast title={notification.title} message={notification.message} onClose={clearNotification} />
         )}
-        {!isMobile && (
-          <RightSidebar
-            activeTab={activeTab}
-            wishlistCount={wishlistCount}
-            applicationsCount={applicationsCount}
-            wishlistPlacements={wishlistPlacements}
-            appliedPlacements={appliedPlacements}
-            selectedWishlist={selectedWishlist}
-            onTabChange={setActiveTab}
-            onToggleWishlistSelection={toggleWishlistSelection}
-            onSelectAllWishlist={selectAllWishlist}
-            onDeselectAllWishlist={deselectAllWishlist}
-            onRemoveWishlist={removeWishlist}
-            onApplyToSelected={applyToSelected}
-            onWithdrawApplication={withdrawApplication}
-            applyButtonLabel={applyButtonLabel}
-            applyButtonDisabled={applyButtonDisabled}
-            homeRequirement={homeRequirement}
-          />
-        )}
+        {modalPlacement && <ModalPlacementDetails placement={modalPlacement} onClose={closeModal} />}
       </div>
-      {notification && (
-        <NotificationToast title={notification.title} message={notification.message} onClose={clearNotification} />
-      )}
-      {modalPlacement && <ModalPlacementDetails placement={modalPlacement} onClose={closeModal} />}
       {isMobile && (
         <MobileViewBar
           activeView={mobileView}

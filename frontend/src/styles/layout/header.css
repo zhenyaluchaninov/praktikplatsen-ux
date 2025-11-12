@@ -13,6 +13,7 @@
             z-index: 120;
             background: white;
             transition: transform 0.3s ease;
+            transform: translateY(calc(-1 * var(--header-offset, 0px)));
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
@@ -160,4 +161,11 @@
 
         .mobile-search-panel {
             display: none;
+        }
+
+        @media (max-width: 768px) {
+            .sticky-stack {
+                transition: none;
+                will-change: transform;
+            }
         }
