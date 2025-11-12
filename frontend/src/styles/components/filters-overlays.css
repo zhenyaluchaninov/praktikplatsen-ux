@@ -371,7 +371,8 @@
             background: #f0f0f0;
         }
 
-        .saved-item.selected {
+        .saved-item.selected,
+        .saved-item:has(.saved-item-checkbox:checked) {
             background: #FFF9F0;
             border: 1px solid #FFE5CC;
         }

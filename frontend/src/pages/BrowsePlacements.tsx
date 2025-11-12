@@ -17,19 +17,19 @@ type MobileExploreMode = 'list' | 'search' | 'filters';
 const BrowsePlacements = () => {
   const {
     placements,
-    favorites,
-    favoritePlacements,
-    selectedFavorites,
+    wishlist,
+    wishlistPlacements,
+    selectedWishlist,
     appliedPlacements,
     activeTab,
     setActiveTab,
     notification,
     clearNotification,
-    toggleFavorite,
-    toggleFavoriteSelection,
-    selectAllFavorites,
-    deselectAllFavorites,
-    removeFavorite,
+    toggleWishlist,
+    toggleWishlistSelection,
+    selectAllWishlist,
+    deselectAllWishlist,
+    removeWishlist,
     applyToSelected,
     withdrawApplication,
     modalPlacement,
@@ -37,7 +37,7 @@ const BrowsePlacements = () => {
     closeModal,
     progress,
     resultsLabel,
-    favoritesCount,
+    wishlistCount,
     applicationsCount,
     applyButtonLabel,
     applyButtonDisabled,
@@ -175,8 +175,8 @@ const BrowsePlacements = () => {
       if (!isMobile) {
         return;
       }
-      if (view === 'wishlist' && activeTab !== 'favorites') {
-        setActiveTab('favorites');
+      if (view === 'wishlist' && activeTab !== 'wishlist') {
+        setActiveTab('wishlist');
       } else if (view === 'applied' && activeTab !== 'applications') {
         setActiveTab('applications');
       }
@@ -265,8 +265,8 @@ const BrowsePlacements = () => {
         {showPlacementsGrid && (
           <PlacementsGrid
             placements={placements}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
+            wishlist={wishlist}
+            onToggleWishlist={toggleWishlist}
             onShowDetails={openModal}
             resultsLabel={resultsLabel}
             sortOption={sortOption}
@@ -318,16 +318,16 @@ const BrowsePlacements = () => {
           >
             <SavedPanels
               activeTab={activeTab}
-              favoritesCount={favoritesCount}
+              wishlistCount={wishlistCount}
               applicationsCount={applicationsCount}
-              favoritePlacements={favoritePlacements}
+              wishlistPlacements={wishlistPlacements}
               appliedPlacements={appliedPlacements}
-              selectedFavorites={selectedFavorites}
+              selectedWishlist={selectedWishlist}
               onTabChange={setActiveTab}
-              onToggleFavoriteSelection={toggleFavoriteSelection}
-              onSelectAllFavorites={selectAllFavorites}
-              onDeselectAllFavorites={deselectAllFavorites}
-              onRemoveFavorite={removeFavorite}
+              onToggleWishlistSelection={toggleWishlistSelection}
+              onSelectAllWishlist={selectAllWishlist}
+              onDeselectAllWishlist={deselectAllWishlist}
+              onRemoveWishlist={removeWishlist}
               onApplyToSelected={applyToSelected}
               onWithdrawApplication={withdrawApplication}
               applyButtonLabel={applyButtonLabel}
@@ -342,16 +342,16 @@ const BrowsePlacements = () => {
         {!isMobile && (
           <RightSidebar
             activeTab={activeTab}
-            favoritesCount={favoritesCount}
+            wishlistCount={wishlistCount}
             applicationsCount={applicationsCount}
-            favoritePlacements={favoritePlacements}
+            wishlistPlacements={wishlistPlacements}
             appliedPlacements={appliedPlacements}
-            selectedFavorites={selectedFavorites}
+            selectedWishlist={selectedWishlist}
             onTabChange={setActiveTab}
-            onToggleFavoriteSelection={toggleFavoriteSelection}
-            onSelectAllFavorites={selectAllFavorites}
-            onDeselectAllFavorites={deselectAllFavorites}
-            onRemoveFavorite={removeFavorite}
+            onToggleWishlistSelection={toggleWishlistSelection}
+            onSelectAllWishlist={selectAllWishlist}
+            onDeselectAllWishlist={deselectAllWishlist}
+            onRemoveWishlist={removeWishlist}
             onApplyToSelected={applyToSelected}
             onWithdrawApplication={withdrawApplication}
             applyButtonLabel={applyButtonLabel}
@@ -370,7 +370,7 @@ const BrowsePlacements = () => {
           onChange={handleMobileViewChange}
           counts={{
             explore: placements.length,
-            wishlist: favoritesCount,
+            wishlist: wishlistCount,
             applied: applicationsCount,
           }}
         />
