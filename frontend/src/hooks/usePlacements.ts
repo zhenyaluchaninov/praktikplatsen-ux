@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import placementsData from '../data/placements.json';
 import type { Placement } from '../types/placement';
@@ -6,12 +6,12 @@ import { useWishlist } from './useWishlist';
 import { useNotifications } from './useNotifications';
 
 const APPLICATION_LIMIT = 10;
-const HOME_MUNICIPALITY_REQUIREMENT = 3;
+const HOME_AREA_REQUIREMENT = 3;
 const HOME_REQUIREMENT_TOOLTIP =
-  'You must apply for at least 3 placements in your own municipality before applying elsewhere. This ensures local students get priority for local placements.';
+  'You must apply for at least 3 placements in your own area before applying elsewhere. This ensures local students get priority for local placements.';
 
 export type SortOption = 'recommended' | 'newest' | 'available' | 'alphabetical' | 'homeArea';
-export type FilterGroupId = 'industry' | 'municipality' | 'type' | 'availability';
+export type FilterGroupId = 'industry' | 'area' | 'type' | 'availability';
 
 type FiltersState = Record<FilterGroupId, Set<string>>;
 
@@ -33,7 +33,9 @@ const placementsFromJson = placementsData as Placement[];
 const INITIAL_WISHLIST: number[] = [];
 const INITIAL_APPLICATIONS: number[] = [];
 
-const FILTER_GROUPS: FilterGroupId[] = ['industry', 'municipality', 'type', 'availability'];
+const FILTER_GROUPS: FilterGroupId[] = ['industry', 'area', 'type', 'availability'];
+const HOME_AREA_NAME = 'Angered';
+const HOME_AREA_FILTER_LABEL = 'Your Area';
 
 const INDUSTRY_LABELS: Record<string, string> = {
   cafe: 'Cafe & Restaurants',
@@ -59,7 +61,7 @@ const AVAILABILITY_FILTERS = [
 
 const createEmptyFilters = (): FiltersState => ({
   industry: new Set<string>(),
-  municipality: new Set<string>(),
+  area: new Set<string>(),
   type: new Set<string>(),
   availability: new Set<string>(),
 });
@@ -78,8 +80,8 @@ const optionMatchesPlacement = (placement: Placement, groupId: FilterGroupId, op
   switch (groupId) {
     case 'industry':
       return placement.industry === optionId;
-    case 'municipality':
-      return placement.municipality === optionId;
+    case 'area':
+      return placement.area === optionId;
     case 'type':
       if (optionId === 'isNew') {
         return placement.isNew;
@@ -209,10 +211,20 @@ export const usePlacements = () => {
   const [filters, setFilters] = useState<FiltersState>(() => createEmptyFilters());
   const [searchValue, setSearchValue] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('recommended');
+  const [isCompletionModalVisible, setCompletionModalVisible] = useState(false);
+  const lastApplicationCountRef = useRef(applications.length);
 
   useEffect(() => {
     setAllPlacements(placementsFromJson);
   }, []);
+
+  useEffect(() => {
+    const previousCount = lastApplicationCountRef.current;
+    if (applications.length === APPLICATION_LIMIT && previousCount < APPLICATION_LIMIT) {
+      setCompletionModalVisible(true);
+    }
+    lastApplicationCountRef.current = applications.length;
+  }, [applications.length]);
 
   const placementsById = useMemo(() => {
     const map = new Map<number, Placement>();
@@ -229,8 +241,8 @@ export const usePlacements = () => {
     });
   }, [allPlacements]);
 
-  const municipalityValues = useMemo(() => {
-    const values = Array.from(new Set(allPlacements.map((placement) => placement.municipality)));
+  const areaValues = useMemo(() => {
+    const values = Array.from(new Set(allPlacements.map((placement) => placement.area)));
     return values.sort((a, b) => a.localeCompare(b, 'en'));
   }, [allPlacements]);
 
@@ -254,8 +266,8 @@ export const usePlacements = () => {
       industry: placementsMatchingSearch.filter((placement) =>
         placementMatchesFiltersExcluding(placement, filters, 'industry'),
       ),
-      municipality: placementsMatchingSearch.filter((placement) =>
-        placementMatchesFiltersExcluding(placement, filters, 'municipality'),
+      area: placementsMatchingSearch.filter((placement) =>
+        placementMatchesFiltersExcluding(placement, filters, 'area'),
       ),
       type: placementsMatchingSearch.filter((placement) =>
         placementMatchesFiltersExcluding(placement, filters, 'type'),
@@ -285,10 +297,10 @@ export const usePlacements = () => {
     return counts;
   }, [placementsMatchingPerGroup]);
 
-  const municipalityCountMap = useMemo(() => {
+  const areaCountMap = useMemo(() => {
     const counts = new Map<string, number>();
-    placementsMatchingPerGroup.municipality.forEach((placement) => {
-      counts.set(placement.municipality, (counts.get(placement.municipality) ?? 0) + 1);
+    placementsMatchingPerGroup.area.forEach((placement) => {
+      counts.set(placement.area, (counts.get(placement.area) ?? 0) + 1);
     });
     return counts;
   }, [placementsMatchingPerGroup]);
@@ -313,15 +325,15 @@ export const usePlacements = () => {
       });
     }
 
-    if (municipalityValues.length > 0) {
+    if (areaValues.length > 0) {
       groups.push({
-        id: 'municipality',
-        label: 'Municipality',
-        options: municipalityValues.map((municipality) => ({
-          id: municipality,
-          label: municipality,
-          count: municipalityCountMap.get(municipality) ?? 0,
-          checked: filters.municipality.has(municipality),
+        id: 'area',
+        label: 'Area',
+        options: areaValues.map((area) => ({
+          id: area,
+          label: area === HOME_AREA_NAME ? HOME_AREA_FILTER_LABEL : area,
+          count: areaCountMap.get(area) ?? 0,
+          checked: filters.area.has(area),
         })),
       });
     }
@@ -359,8 +371,8 @@ export const usePlacements = () => {
     filters,
     industryCountMap,
     industryValues,
-    municipalityCountMap,
-    municipalityValues,
+    areaCountMap,
+    areaValues,
     placementsMatchingPerGroup,
     typeFilterOptions,
   ]);
@@ -391,15 +403,15 @@ export const usePlacements = () => {
     [selectedWishlist, placementsById],
   );
 
-  const homeRequirementMet = homeApplicationsCount >= HOME_MUNICIPALITY_REQUIREMENT;
+  const homeRequirementMet = homeApplicationsCount >= HOME_AREA_REQUIREMENT;
   const homeRequirementSatisfiedAfterSelection =
-    homeRequirementMet || homeApplicationsCount + selectedWishlistHomeCount >= HOME_MUNICIPALITY_REQUIREMENT;
+    homeRequirementMet || homeApplicationsCount + selectedWishlistHomeCount >= HOME_AREA_REQUIREMENT;
   const homeRequirementBlocking = !homeRequirementSatisfiedAfterSelection;
   const homeRequirementDisplayCount = Math.min(
     homeApplicationsCount + selectedWishlistHomeCount,
-    HOME_MUNICIPALITY_REQUIREMENT,
+    HOME_AREA_REQUIREMENT,
   );
-  const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_MUNICIPALITY_REQUIREMENT}`;
+  const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_AREA_REQUIREMENT}`;
 
   const toggleWishlist = useCallback(
     (id: number) => {
@@ -454,8 +466,8 @@ export const usePlacements = () => {
   const applyToSelected = useCallback(() => {
     if (!homeRequirementSatisfiedAfterSelection) {
       showNotification(
-        'Apply in your municipality first',
-        `Select placements in your municipality until you reach ${HOME_MUNICIPALITY_REQUIREMENT} applications.`,
+        'Apply in your area first',
+        `Select placements in your area until you reach ${HOME_AREA_REQUIREMENT} applications.`,
       );
       return;
     }
@@ -527,6 +539,10 @@ export const usePlacements = () => {
     setSortOption(option);
   }, []);
 
+  const closeCompletionModal = useCallback(() => {
+    setCompletionModalVisible(false);
+  }, []);
+
   const modalPlacement = modalPlacementId ? placementsById.get(modalPlacementId) ?? null : null;
 
   const progressCount = `${applications.length}/${APPLICATION_LIMIT}`;
@@ -561,6 +577,8 @@ export const usePlacements = () => {
     modalPlacement,
     openModal,
     closeModal,
+    completionModalVisible: isCompletionModalVisible,
+    closeCompletionModal,
     progress: {
       count: progressCount,
       percentage: progressPercentage,
@@ -569,7 +587,7 @@ export const usePlacements = () => {
     },
     homeRequirement: {
       met: homeRequirementMet,
-      text: `Apply to at least ${HOME_MUNICIPALITY_REQUIREMENT} placements in your municipality (${homeRequirementDisplay})`,
+      text: `Apply to at least ${HOME_AREA_REQUIREMENT} placements in your area (${homeRequirementDisplay})`,
       tooltip: HOME_REQUIREMENT_TOOLTIP,
       display: homeRequirementDisplay,
       blocking: homeRequirementBlocking,

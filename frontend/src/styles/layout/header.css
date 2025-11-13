@@ -137,6 +137,20 @@
             color: #666;
         }
 
+        .progress-status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            margin-right: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2E7D32;
+            border: 1px solid rgba(46,125,50,0.3);
+            border-radius: 999px;
+            background: rgba(46,125,50,0.08);
+            white-space: nowrap;
+        }
+
         .progress-count {
             font-weight: 700;
             color: #FF9933;
@@ -177,5 +191,11 @@
             .sticky-stack {
                 transition: none;
                 will-change: transform;
+            }
+
+            .progress-status-badge {
+                font-size: 11px;
+                padding: 2px 6px;
+                margin-right: 6px;
             }
         }

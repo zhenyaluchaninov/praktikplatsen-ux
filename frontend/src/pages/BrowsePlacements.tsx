@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { CompletionModal } from '../components/CompletionModal';
 import { FiltersContent } from '../components/FiltersContent';
 import { FiltersSidebar } from '../components/FiltersSidebar';
 import { Header } from '../components/Header';
@@ -37,6 +38,8 @@ const BrowsePlacements = () => {
     modalPlacement,
     openModal,
     closeModal,
+    completionModalVisible,
+    closeCompletionModal,
     progress,
     resultsLabel,
     wishlistCount,
@@ -382,6 +385,7 @@ const BrowsePlacements = () => {
             visible={notificationVisible}
           />
         )}
+        {completionModalVisible && <CompletionModal onClose={closeCompletionModal} />}
         {modalPlacement && <ModalPlacementDetails placement={modalPlacement} onClose={closeModal} />}
       </div>
       {isMobile && (
