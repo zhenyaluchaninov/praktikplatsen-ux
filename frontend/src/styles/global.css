@@ -6,6 +6,7 @@
 @import './components/filters-panel.css';
 @import './components/filters-overlays.css';
 @import './components/cards.css';
+@import './components/completion-modal.css';
 @import './components/notifications.css';
 @import './components/loading.css';
 @import './base/responsive.css';

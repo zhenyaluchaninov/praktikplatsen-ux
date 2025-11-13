@@ -4,7 +4,7 @@ export type Placement = {
   company: string;
   logo: string;
   industry: string;
-  municipality: string;
+  area: string;
   location: string;
   spots: number;
   totalSpots: number;

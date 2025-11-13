@@ -10,6 +10,7 @@ export const ProgressBar = ({ countText, percentage, weekLabel, complete = false
     <div className="progress-content">
       <div className="progress-header">
         <div className="progress-text">
+          {complete && <span className="progress-status-badge">All done!</span>}
           Your Applications:{' '}
           <span className={`progress-count${complete ? ' progress-count--complete' : ''}`} id="progressCount">
             {countText}
