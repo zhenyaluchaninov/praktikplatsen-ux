@@ -100,20 +100,40 @@ export const PlacementsGrid = ({
                 </div>
               </div>
               <div className="card-meta">
-                <div className="meta-item">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
-                  {placement.location}
-                </div>
+                {placement.homeArea ? (
+                  <div className="meta-item home-area">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Your area</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="meta-item">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                      </svg>
+                      {placement.location}
+                    </div>
+                    <span className="meta-separator" aria-hidden="true"></span>
+                  </>
+                )}
                 <div className="meta-item">
                   <svg
                     viewBox="0 0 24 24"
@@ -130,22 +150,6 @@ export const PlacementsGrid = ({
                   </svg>
                   {placement.spots}/{placement.totalSpots} spots
                 </div>
-                {placement.homeArea && (
-                  <div className="meta-item home-area">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    <span>Your area</span>
-                  </div>
-                )}
               </div>
               <div className="card-footer">
                 <button type="button" className="btn-details" onClick={() => onShowDetails(placement.id)}>

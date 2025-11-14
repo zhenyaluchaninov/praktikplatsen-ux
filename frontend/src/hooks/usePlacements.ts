@@ -35,7 +35,7 @@ const INITIAL_APPLICATIONS: number[] = [];
 
 const FILTER_GROUPS: FilterGroupId[] = ['industry', 'area', 'type', 'availability'];
 const HOME_AREA_NAME = 'Angered';
-const HOME_AREA_FILTER_LABEL = 'Your Area';
+const HOME_AREA_FILTER_LABEL = 'Your area';
 
 const INDUSTRY_LABELS: Record<string, string> = {
   cafe: 'Cafe & Restaurants',

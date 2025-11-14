@@ -412,6 +412,16 @@
             flex-wrap: wrap;
         }
 
+        .saved-card__meta-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 999px;
+            background: #d0d0d0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .saved-card__company {
             font-size: 12px;
             color: #777;
@@ -423,7 +433,7 @@
             border-radius: 999px;
             background: #E8F5E9;
             color: #2E7D32;
-            font-weight: 400;
+            font-weight: 600;
         }
 
         .saved-card__footer {
@@ -456,6 +466,12 @@
             justify-content: center;
             gap: 4px;
             line-height: 1.2;
+        }
+
+        .saved-card__primary-btn:hover {
+            border-color: #ffcc99;
+            background: #fff6ee;
+            color: #cc7a1e;
         }
 
         .saved-card__primary-btn.is-selected {
@@ -498,12 +514,14 @@
         }
 
         .saved-card__icon-btn.danger {
-            color: #c62828;
+            color: #666;
+            border-color: #ddd;
         }
 
         .saved-card__icon-btn.danger:hover {
             border-color: #f1b5b5;
             background: #fff3f3;
+            color: #c62828;
         }
 
         .saved-card__icon-btn svg {
@@ -539,8 +557,14 @@
         }
 
         .saved-card__pill.danger {
-            color: #c62828;
+            color: #666;
+            border-color: #ddd;
+        }
+
+        .saved-card__pill.danger:hover {
             border-color: #f1b5b5;
+            background: #fff1f1;
+            color: #c62828;
         }
 
         .saved-panels--mobile .saved-controls {
@@ -565,7 +589,7 @@
 
         .saved-panel__footer {
             flex-shrink: 0;
-            padding-top: 12px;
+            padding-top: 0px;
             border-top: 1px solid #f0f0f0;
             margin-top: 8px;
         }

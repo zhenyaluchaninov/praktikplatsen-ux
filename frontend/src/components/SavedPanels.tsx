@@ -235,8 +235,13 @@ export const SavedPanels = ({
                       <div className="saved-card__info">
                         <div className="saved-card__title">{placement.title}</div>
                         <div className="saved-card__meta">
+                          {placement.homeArea && (
+                            <>
+                              <span className="saved-card__chip">Your area</span>
+                              <span className="saved-card__meta-dot" aria-hidden="true"></span>
+                            </>
+                          )}
                           <span className="saved-card__company">{placement.company}</span>
-                          {placement.homeArea && <span className="saved-card__chip">Your Area</span>}
                         </div>
                       </div>
                     </div>
@@ -336,14 +341,19 @@ export const SavedPanels = ({
                       <div className="saved-card__logo company-logo company-logo--compact">
                         <LogoImage placement={placement} />
                     </div>
-                    <div className="saved-card__info">
-                      <div className="saved-card__title">{placement.title}</div>
-                      <div className="saved-card__meta">
-                        <span className="saved-card__company">{placement.company}</span>
-                        {placement.homeArea && <span className="saved-card__chip">Your Area</span>}
+                      <div className="saved-card__info">
+                        <div className="saved-card__title">{placement.title}</div>
+                        <div className="saved-card__meta">
+                          {placement.homeArea && (
+                            <>
+                              <span className="saved-card__chip">Your area</span>
+                              <span className="saved-card__meta-dot" aria-hidden="true"></span>
+                            </>
+                          )}
+                          <span className="saved-card__company">{placement.company}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
                     <div className="saved-card__footer saved-card__footer--applied">
                       <button
                         type="button"
