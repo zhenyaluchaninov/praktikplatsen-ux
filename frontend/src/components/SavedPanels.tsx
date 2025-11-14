@@ -92,6 +92,8 @@ export const SavedPanels = ({
   const activeHeadingCount = activeTab === 'wishlist' ? wishlistCount : applicationsCount;
 
   const panelClassName = ['saved-panels', mobileMode ? 'saved-panels--mobile' : ''].filter(Boolean).join(' ');
+  const wishlistTabDisplay = activeTab === 'wishlist' ? (mobileMode ? 'block' : 'flex') : 'none';
+  const applicationsTabDisplay = activeTab === 'applications' ? (mobileMode ? 'block' : 'flex') : 'none';
 
   const submitButton = (
     <button
@@ -106,7 +108,11 @@ export const SavedPanels = ({
   );
 
   const submitButtonWithTooltip = <Tooltip content={applyButtonTooltip}>{submitButton}</Tooltip>;
-  const submitSection = mobileMode ? <div className="saved-panels__mobile-submit">{submitButtonWithTooltip}</div> : submitButtonWithTooltip;
+  const submitSection = mobileMode ? (
+    <div className="saved-panels__mobile-submit">{submitButtonWithTooltip}</div>
+  ) : (
+    <div className="saved-panel__footer">{submitButtonWithTooltip}</div>
+  );
 
   return (
     <div className={panelClassName}>
@@ -135,150 +141,158 @@ export const SavedPanels = ({
         </div>
       ) : null}
 
-      <div id="wishlistTab" className="tab-content" style={{ display: activeTab === 'wishlist' ? 'block' : 'none' }}>
-        <div
-          className="saved-controls"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '12px',
-            paddingBottom: '8px',
-            borderBottom: '1px solid #f0f0f0',
-          }}
-        >
-          <span style={{ fontSize: '13px', color: '#666', fontWeight: 600 }}>Select placements to apply:</span>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={onSelectAllWishlist}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#FF9933',
-                fontSize: '12px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-              }}
-            >
-              Select All
-            </button>
-            <button
-              type="button"
-              onClick={onDeselectAllWishlist}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#999',
-                fontSize: '12px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-              }}
-            >
-              Clear
-            </button>
+      <div id="wishlistTab" className="tab-content" style={{ display: wishlistTabDisplay }}>
+        <div className="saved-panel__header">
+          <div
+            className="saved-controls"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '12px',
+              paddingBottom: '8px',
+              borderBottom: '1px solid #f0f0f0',
+            }}
+          >
+            <span style={{ fontSize: '13px', color: '#666', fontWeight: 600 }}>Select placements to apply:</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={onSelectAllWishlist}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#FF9933',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                }}
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                onClick={onDeselectAllWishlist}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#999',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                }}
+              >
+                Clear
+              </button>
+            </div>
           </div>
+
+          <Tooltip content={homeRequirement.tooltip}>
+            <div className={bannerClasses}>
+              <span className="home-requirement-banner-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </span>
+              <span className="home-requirement-text">{homeRequirement.text}</span>
+            </div>
+          </Tooltip>
         </div>
 
-        <Tooltip content={homeRequirement.tooltip}>
-          <div className={bannerClasses}>
-            <span className="home-requirement-banner-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </span>
-            <span className="home-requirement-text">{homeRequirement.text}</span>
-          </div>
-        </Tooltip>
-
-        <div className="saved-list" id="wishlistList">
-          {wishlistEmpty ? (
-            <EmptyWishlistState />
-          ) : (
-            wishlistPlacements.map((placement) => {
-              const isSelected = selectedWishlist.includes(placement.id);
-              return (
-                <div className={`saved-item ${isSelected ? 'selected' : ''}`} key={placement.id}>
-                  <input
-                    type="checkbox"
-                    className="saved-item-checkbox"
-                    id={`wish-${placement.id}`}
-                    checked={isSelected}
-                    onChange={() => onToggleWishlistSelection(placement.id)}
-                  />
-                  <label htmlFor={`wish-${placement.id}`} className="saved-item-info" style={{ cursor: 'pointer' }}>
-                    <div className="saved-item-title">{placement.title}</div>
-                    <div className="saved-item-company">{placement.company}</div>
-                  </label>
-                  <div className="saved-item-actions">
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      title="Remove from wishlist"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onRemoveWishlist(placement.id);
-                      }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      </svg>
-                    </button>
+        <div className="saved-panel__scroll">
+          <div className="saved-list" id="wishlistList">
+            {wishlistEmpty ? (
+              <EmptyWishlistState />
+            ) : (
+              wishlistPlacements.map((placement) => {
+                const isSelected = selectedWishlist.includes(placement.id);
+                return (
+                  <div className={`saved-item ${isSelected ? 'selected' : ''}`} key={placement.id}>
+                    <input
+                      type="checkbox"
+                      className="saved-item-checkbox"
+                      id={`wish-${placement.id}`}
+                      checked={isSelected}
+                      onChange={() => onToggleWishlistSelection(placement.id)}
+                    />
+                    <label htmlFor={`wish-${placement.id}`} className="saved-item-info" style={{ cursor: 'pointer' }}>
+                      <div className="saved-item-title">{placement.title}</div>
+                      <div className="saved-item-company">{placement.company}</div>
+                    </label>
+                    <div className="saved-item-actions">
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        title="Remove from wishlist"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRemoveWishlist(placement.id);
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </div>
 
         {submitSection}
       </div>
 
-      <div id="applicationsTab" className="tab-content" style={{ display: activeTab === 'applications' ? 'block' : 'none' }}>
+      <div id="applicationsTab" className="tab-content" style={{ display: applicationsTabDisplay }}>
         {!applicationsEmpty && (
-          <div className="applications-info">
-            <span className="applications-info-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </span>
-            <div>Your applications are being reviewed. You'll be notified via email as soon as there are updates.</div>
+          <div className="saved-panel__header">
+            <div className="applications-info">
+              <span className="applications-info-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </span>
+              <div>Your applications are being reviewed. You'll be notified via email as soon as there are updates.</div>
+            </div>
           </div>
         )}
-        <div className="saved-list" id="applicationsList">
-          {applicationsEmpty ? (
-            <EmptyApplicationsState />
-          ) : (
-            appliedPlacements.map((placement) => (
-              <div className="saved-item" key={placement.id}>
-                <div className="saved-item-info">
-                  <div className="saved-item-title">{placement.title}</div>
-                  <div className="saved-item-company">{placement.company}</div>
+        <div className="saved-panel__scroll">
+          <div className="saved-list" id="applicationsList">
+            {applicationsEmpty ? (
+              <EmptyApplicationsState />
+            ) : (
+              appliedPlacements.map((placement) => (
+                <div className="saved-item" key={placement.id}>
+                  <div className="saved-item-info">
+                    <div className="saved-item-title">{placement.title}</div>
+                    <div className="saved-item-company">{placement.company}</div>
+                  </div>
+                  <div className="saved-item-actions">
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      title="Withdraw application"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onWithdrawApplication(placement.id);
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-                <div className="saved-item-actions">
-                  <button
-                    type="button"
-                    className="icon-btn"
-                    title="Withdraw application"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onWithdrawApplication(placement.id);
-                    }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

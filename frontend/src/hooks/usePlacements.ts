@@ -416,13 +416,17 @@ export const usePlacements = () => {
   const toggleWishlist = useCallback(
     (id: number) => {
       const isCurrentlyWishlist = wishlist.includes(id);
+      if (!isCurrentlyWishlist && applications.includes(id)) {
+        showNotification('Already applied', 'This placement is already in your Applied tab');
+        return;
+      }
       toggleWishlistState(id);
       showNotification(
         isCurrentlyWishlist ? 'Removed from wishlist' : 'Added to wishlist',
         isCurrentlyWishlist ? '' : 'Check the box to select it for application',
       );
     },
-    [wishlist, toggleWishlistState, showNotification],
+    [applications, wishlist, toggleWishlistState, showNotification],
   );
 
   const removeWishlist = useCallback(
@@ -484,10 +488,22 @@ export const usePlacements = () => {
       }
 
       const remainingSlots = APPLICATION_LIMIT - prev.length;
-      const toApply = selectedWishlist.filter((id) => !prev.includes(id)).slice(0, remainingSlots);
+      const alreadyAppliedSelections = selectedWishlist.filter((id) => prev.includes(id));
+      const pendingSelections = selectedWishlist.filter((id) => !prev.includes(id));
+
+      if (alreadyAppliedSelections.length > 0) {
+        removeWishlistItems(alreadyAppliedSelections);
+      }
+
+      if (pendingSelections.length === 0) {
+        showNotification('Already applied', 'Selected placements are already in your Applied tab');
+        return prev;
+      }
+
+      const toApply = pendingSelections.slice(0, remainingSlots);
 
       if (toApply.length === 0) {
-        showNotification('No wishlist selected', 'Check the boxes to pick wishlist placements');
+        showNotification('Application limit reached', 'You can only apply to 10 placements');
         return prev;
       }
 
