@@ -468,6 +468,11 @@ export const usePlacements = () => {
   );
 
   const applyToSelected = useCallback(() => {
+    if (selectedWishlist.length === 0) {
+      showNotification('No wishlist selected', 'Use the Select buttons to pick wishlist placements');
+      return;
+    }
+
     if (!homeRequirementSatisfiedAfterSelection) {
       showNotification(
         'Apply in your area first',
@@ -479,11 +484,6 @@ export const usePlacements = () => {
     setApplications((prev) => {
       if (prev.length >= APPLICATION_LIMIT) {
         showNotification('Application limit reached', 'You can only apply to 10 placements');
-        return prev;
-      }
-
-      if (selectedWishlist.length === 0) {
-        showNotification('No wishlist selected', 'Use the Select buttons to pick wishlist placements');
         return prev;
       }
 
@@ -566,7 +566,7 @@ export const usePlacements = () => {
   const canApplyMore = applications.length < APPLICATION_LIMIT;
   const progressComplete = !canApplyMore;
   const applyButtonLabel = `Apply to Selected (${selectedWishlist.length})`;
-  const applyButtonDisabled = selectedWishlist.length === 0 || !canApplyMore || homeRequirementBlocking;
+  const applyButtonDisabled = selectedWishlist.length === 0 || !canApplyMore;
   const resultsLabel = `Showing ${sortedPlacements.length} ${sortedPlacements.length === 1 ? 'placement' : 'placements'}`;
 
   return {

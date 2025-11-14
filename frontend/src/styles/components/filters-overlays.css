@@ -160,6 +160,8 @@
             gap: 0px;
             height: 100%;
             min-height: 0;
+            position: relative;
+            overflow: visible;
         }
 
         .saved-panels--mobile {
@@ -298,6 +300,43 @@
 
         .home-requirement-text {
             line-height: 1.4;
+        }
+
+        .home-requirement-callout {
+            position: absolute;
+            z-index: 25;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transform: translate(-50%, -50%);
+        }
+
+        .home-requirement-callout-bubble {
+            background: #FF9933;
+            border-radius: 12px;
+            padding: 6px 16px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 18px 32px rgba(255, 153, 51, 0.35);
+            border: 1px solid #ffb871;
+        }
+
+        .home-requirement-callout__label {
+            white-space: nowrap;
+        }
+
+        .home-requirement-callout-bubble--in-button {
+        }
+
+        .home-requirement-callout__arrow {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #FF9933;
         }
 
         .tooltip-wrapper {
@@ -621,25 +660,85 @@
         .btn-submit-all {
             width: 100%;
             padding: 14px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
             margin-top: 16px;
-            transition: background 0.2s, box-shadow 0.2s;
+            transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
             flex-shrink: 0;
+            position: relative;
+            border: 1px solid transparent;
         }
 
-        .btn-submit-all:hover {
-            background: #45a049;
+        .btn-submit-all[aria-disabled="true"] {
+            opacity: 0.85;
         }
 
-        .btn-submit-all:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .btn-submit-all:focus-visible {
+            outline: 2px solid rgba(76, 175, 80, 0.35);
+            outline-offset: 2px;
+        }
+
+        .btn-submit-all--neutral {
+            background: #ffffff;
+            border-color: #FF9933;
+            color: #FF9933;
+            box-shadow: 0 8px 20px rgba(255, 153, 51, 0.12);
+        }
+
+        .btn-submit-all--neutral:hover {
+            background: #FFF7EF;
+            color: #E67E00;
+        }
+
+        .btn-submit-all--ready {
+            background: #4CAF50;
+            color: #ffffff;
+            box-shadow: 0 12px 24px rgba(76, 175, 80, 0.35);
+            border-color: #4CAF50;
+        }
+
+        .btn-submit-all--ready:hover {
+            background: #43a047;
+            transform: translateY(-1px);
+        }
+
+        @keyframes applyButtonShake {
+            0% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-6px);
+            }
+            40% {
+                transform: translateX(6px);
+            }
+            60% {
+                transform: translateX(-3px);
+            }
+            80% {
+                transform: translateX(3px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes applyButtonGlow {
+            0% {
+                box-shadow: 0 0 0 rgba(255, 153, 51, 0.0);
+            }
+            50% {
+                box-shadow: 0 15px 30px rgba(255, 153, 51, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 0 rgba(255, 153, 51, 0.0);
+            }
+        }
+
+        .btn-submit-all--attention {
+            animation: applyButtonShake 0.5s ease, applyButtonGlow 1.4s ease-in-out infinite;
         }
 
 

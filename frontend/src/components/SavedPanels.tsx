@@ -1,4 +1,6 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
+import { AnimatePresence, easeInOut, motion, type Transition } from 'framer-motion';
 
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
@@ -36,6 +38,16 @@ export type SavedPanelsProps = {
   showMobileHeading?: boolean;
   mobileMode?: boolean;
 };
+
+type HintPositions = {
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+};
+
+const HINT_AXIS_OFFSET_X = -50;
+const HINT_START_OFFSET_FROM_BOTTOM = 40;
+const HINT_END_OFFSET_FROM_TOP = 60;
+const BANNER_PULSE_DELAY = 200;
 
 const EmptyWishlistState = () => (
   <div className="empty-state">
@@ -88,10 +100,98 @@ export const SavedPanels = ({
   showMobileHeading = true,
   mobileMode = false,
 }: SavedPanelsProps) => {
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const requirementHintTimeoutRef = useRef<number | null>(null);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [hintPositions, setHintPositions] = useState<HintPositions | null>(null);
+  const [hintKey, setHintKey] = useState(0);
+  const bannerPulseTimeoutRef = useRef<number | null>(null);
+  const [bannerKey, setBannerKey] = useState(0);
+  const requirementHintActive = hintVisible;
+
   const wishlistEmpty = wishlistPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
-  const applyButtonTooltip = applyButtonDisabled && homeRequirement.blocking ? homeRequirement.tooltip : undefined;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
+  const shouldPulseBanner = bannerKey > 0 && hintVisible;
+  const bannerAnimation = shouldPulseBanner ? { y: [0, -4, 0] } : { y: 0 };
+  const bannerTransition: Transition = { duration: 0.6, repeat: 1, ease: easeInOut };
+
+  const triggerRequirementHint = useCallback(() => {
+    if (!panelRef.current) {
+      return;
+    }
+    const rect = panelRef.current.getBoundingClientRect();
+    const axisX = rect.width / 2 + HINT_AXIS_OFFSET_X;
+    const startY = rect.height - HINT_START_OFFSET_FROM_BOTTOM;
+    const endY = HINT_END_OFFSET_FROM_TOP;
+    const clampedStartY = Math.max(0, Math.min(rect.height, startY));
+    const clampedEndY = Math.max(0, Math.min(rect.height, endY));
+
+    const positions: HintPositions = {
+      start: { x: axisX, y: clampedStartY },
+      end: { x: axisX, y: clampedEndY },
+    };
+
+    if (requirementHintTimeoutRef.current) {
+      window.clearTimeout(requirementHintTimeoutRef.current);
+      requirementHintTimeoutRef.current = null;
+    }
+    if (bannerPulseTimeoutRef.current) {
+      window.clearTimeout(bannerPulseTimeoutRef.current);
+      bannerPulseTimeoutRef.current = null;
+    }
+
+    setHintPositions(positions);
+    setHintVisible(true);
+    setHintKey((prev) => prev + 1);
+    setBannerKey(0);
+
+    requirementHintTimeoutRef.current = window.setTimeout(() => {
+      setHintVisible(false);
+      requirementHintTimeoutRef.current = null;
+    }, 3000);
+
+    bannerPulseTimeoutRef.current = window.setTimeout(() => {
+      setBannerKey((prev) => prev + 1);
+      bannerPulseTimeoutRef.current = null;
+    }, BANNER_PULSE_DELAY);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (requirementHintTimeoutRef.current) {
+        window.clearTimeout(requirementHintTimeoutRef.current);
+        requirementHintTimeoutRef.current = null;
+      }
+      if (bannerPulseTimeoutRef.current) {
+        window.clearTimeout(bannerPulseTimeoutRef.current);
+        bannerPulseTimeoutRef.current = null;
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!homeRequirement.blocking) {
+      if (requirementHintTimeoutRef.current) {
+        window.clearTimeout(requirementHintTimeoutRef.current);
+        requirementHintTimeoutRef.current = null;
+      }
+      if (bannerPulseTimeoutRef.current) {
+        window.clearTimeout(bannerPulseTimeoutRef.current);
+        bannerPulseTimeoutRef.current = null;
+      }
+      setHintVisible(false);
+    }
+  }, [homeRequirement.blocking]);
+
+  const handleApplyClick = useCallback(() => {
+    if (homeRequirement.blocking) {
+      triggerRequirementHint();
+      return;
+    }
+    onApplyToSelected();
+  }, [homeRequirement.blocking, onApplyToSelected, triggerRequirementHint]);
 
   const activeHeading = heading ?? (activeTab === 'wishlist' ? 'Wishlist' : 'Applied');
   const activeHeadingCount = activeTab === 'wishlist' ? wishlistCount : applicationsCount;
@@ -99,20 +199,28 @@ export const SavedPanels = ({
   const panelClassName = ['saved-panels', mobileMode ? 'saved-panels--mobile' : ''].filter(Boolean).join(' ');
   const wishlistTabDisplay = activeTab === 'wishlist' ? (mobileMode ? 'block' : 'flex') : 'none';
   const applicationsTabDisplay = activeTab === 'applications' ? (mobileMode ? 'block' : 'flex') : 'none';
+  const buttonClasses = [
+    'btn-submit-all',
+    homeRequirement.ready ? 'btn-submit-all--ready' : 'btn-submit-all--neutral',
+    requirementHintActive ? 'btn-submit-all--attention' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const submitButton = (
     <button
+      key={hintKey}
       type="button"
-      className="btn-submit-all"
+      className={buttonClasses}
       id="applyAllBtn"
-      onClick={onApplyToSelected}
-      disabled={applyButtonDisabled}
+      onClick={handleApplyClick}
+      aria-disabled={applyButtonDisabled}
     >
       {applyButtonLabel}
     </button>
   );
 
-  const submitButtonWithTooltip = <Tooltip content={applyButtonTooltip}>{submitButton}</Tooltip>;
+  const submitButtonWithTooltip = submitButton;
   const submitSection = mobileMode ? (
     <div className="saved-panels__mobile-submit">{submitButtonWithTooltip}</div>
   ) : (
@@ -120,7 +228,7 @@ export const SavedPanels = ({
   );
 
   return (
-    <div className={panelClassName}>
+    <div className={panelClassName} ref={panelRef}>
       {showTabs ? (
         <div className="sidebar-tabs">
           <button type="button" className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`} onClick={() => onTabChange('wishlist')}>
@@ -193,7 +301,12 @@ export const SavedPanels = ({
           </div>
 
           <Tooltip content={homeRequirement.tooltip}>
-            <div className={bannerClasses}>
+            <motion.div
+              key={bannerKey}
+              className={bannerClasses}
+              animate={bannerAnimation}
+              transition={bannerTransition}
+            >
               <span className="home-requirement-banner-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
@@ -202,7 +315,7 @@ export const SavedPanels = ({
                 </svg>
               </span>
               <span className="home-requirement-text">{homeRequirement.text}</span>
-            </div>
+            </motion.div>
           </Tooltip>
         </div>
 
@@ -378,6 +491,33 @@ export const SavedPanels = ({
           </div>
         </div>
       </div>
+      <AnimatePresence>
+        {hintVisible && hintPositions ? (
+          <motion.div
+            key={hintKey}
+            className="home-requirement-callout"
+            initial={{
+              left: hintPositions.start.x,
+              top: hintPositions.start.y,
+              opacity: 0,
+              scale: 0.9,
+            }}
+            animate={{
+              left: hintPositions.end.x,
+              top: hintPositions.end.y,
+              opacity: 1,
+              scale: 1,
+            }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.55, ease: easeInOut }}
+          >
+            <div className="home-requirement-callout-bubble">
+              <span className="home-requirement-callout__label">Read this first!</span>
+            </div>
+            <div className="home-requirement-callout__arrow" aria-hidden="true"></div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 };
