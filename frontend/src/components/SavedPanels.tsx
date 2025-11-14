@@ -1,4 +1,7 @@
+import type { KeyboardEvent } from 'react';
+
 import type { Placement } from '../types/placement';
+import { LogoImage } from './LogoImage';
 import { Tooltip } from './Tooltip';
 
 export type HomeRequirementState = {
@@ -24,6 +27,7 @@ export type SavedPanelsProps = {
   onRemoveWishlist: (id: number) => void;
   onApplyToSelected: () => void;
   onWithdrawApplication: (id: number) => void;
+  onShowInfo: (id: number) => void;
   applyButtonLabel: string;
   applyButtonDisabled: boolean;
   homeRequirement: HomeRequirementState;
@@ -75,6 +79,7 @@ export const SavedPanels = ({
   onRemoveWishlist,
   onApplyToSelected,
   onWithdrawApplication,
+  onShowInfo,
   applyButtonLabel,
   applyButtonDisabled,
   homeRequirement,
@@ -208,34 +213,78 @@ export const SavedPanels = ({
             ) : (
               wishlistPlacements.map((placement) => {
                 const isSelected = selectedWishlist.includes(placement.id);
+                const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onShowInfo(placement.id);
+                  }
+                };
                 return (
-                  <div className={`saved-item ${isSelected ? 'selected' : ''}`} key={placement.id}>
-                    <input
-                      type="checkbox"
-                      className="saved-item-checkbox"
-                      id={`wish-${placement.id}`}
-                      checked={isSelected}
-                      onChange={() => onToggleWishlistSelection(placement.id)}
-                    />
-                    <label htmlFor={`wish-${placement.id}`} className="saved-item-info" style={{ cursor: 'pointer' }}>
-                      <div className="saved-item-title">{placement.title}</div>
-                      <div className="saved-item-company">{placement.company}</div>
-                    </label>
-                    <div className="saved-item-actions">
+                  <div
+                    className={`saved-item saved-card saved-card--wishlist ${isSelected ? 'selected' : ''}`}
+                    key={placement.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onShowInfo(placement.id)}
+                    onKeyDown={handleCardKeyDown}
+                  >
+                    <div className="saved-card__main">
+                      <div className="saved-card__logo company-logo company-logo--compact">
+                        <LogoImage placement={placement} />
+                      </div>
+                      <div className="saved-card__info">
+                        <div className="saved-card__title">{placement.title}</div>
+                        <div className="saved-card__meta">
+                          <span className="saved-card__company">{placement.company}</span>
+                          {placement.homeArea && <span className="saved-card__chip">Your Area</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="saved-card__footer saved-card__footer--wishlist">
                       <button
                         type="button"
-                        className="icon-btn"
-                        title="Remove from wishlist"
+                        className={`saved-card__primary-btn ${isSelected ? 'is-selected' : ''}`}
                         onClick={(event) => {
                           event.stopPropagation();
-                          onRemoveWishlist(placement.id);
+                          onToggleWishlistSelection(placement.id);
                         }}
+                        aria-pressed={isSelected}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
+                        {isSelected ? (
+                          <>
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Selected
+                          </>
+                        ) : (
+                          'Select'
+                        )}
                       </button>
+                      <div className="saved-card__secondary">
+                        <button
+                          type="button"
+                          className="saved-card__icon-btn danger"
+                          title="Remove from wishlist"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onRemoveWishlist(placement.id);
+                          }}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -267,30 +316,54 @@ export const SavedPanels = ({
             {applicationsEmpty ? (
               <EmptyApplicationsState />
             ) : (
-              appliedPlacements.map((placement) => (
-                <div className="saved-item" key={placement.id}>
-                  <div className="saved-item-info">
-                    <div className="saved-item-title">{placement.title}</div>
-                    <div className="saved-item-company">{placement.company}</div>
+              appliedPlacements.map((placement) => {
+                const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onShowInfo(placement.id);
+                  }
+                };
+                return (
+                  <div
+                    className="saved-item saved-card saved-card--applied"
+                    key={placement.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onShowInfo(placement.id)}
+                    onKeyDown={handleCardKeyDown}
+                  >
+                    <div className="saved-card__main">
+                      <div className="saved-card__logo company-logo company-logo--compact">
+                        <LogoImage placement={placement} />
+                    </div>
+                    <div className="saved-card__info">
+                      <div className="saved-card__title">{placement.title}</div>
+                      <div className="saved-card__meta">
+                        <span className="saved-card__company">{placement.company}</span>
+                        {placement.homeArea && <span className="saved-card__chip">Your Area</span>}
+                      </div>
+                    </div>
                   </div>
-                  <div className="saved-item-actions">
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      title="Withdraw application"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onWithdrawApplication(placement.id);
-                      }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
+                    <div className="saved-card__footer saved-card__footer--applied">
+                      <button
+                        type="button"
+                        className="saved-card__pill danger"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onWithdrawApplication(placement.id);
+                        }}
+                        title="Withdraw application"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

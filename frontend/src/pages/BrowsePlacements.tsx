@@ -336,6 +336,7 @@ const BrowsePlacements = () => {
                 onRemoveWishlist={removeWishlist}
                 onApplyToSelected={applyToSelected}
                 onWithdrawApplication={withdrawApplication}
+                onShowInfo={openModal}
                 applyButtonLabel={applyButtonLabel}
                 applyButtonDisabled={applyButtonDisabled}
                 homeRequirement={homeRequirement}
@@ -360,6 +361,7 @@ const BrowsePlacements = () => {
               onRemoveWishlist={removeWishlist}
               onApplyToSelected={applyToSelected}
               onWithdrawApplication={withdrawApplication}
+              onShowInfo={openModal}
               applyButtonLabel={applyButtonLabel}
               applyButtonDisabled={applyButtonDisabled}
               homeRequirement={homeRequirement}

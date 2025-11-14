@@ -483,7 +483,7 @@ export const usePlacements = () => {
       }
 
       if (selectedWishlist.length === 0) {
-        showNotification('No wishlist selected', 'Check the boxes to pick wishlist placements');
+        showNotification('No wishlist selected', 'Use the Select buttons to pick wishlist placements');
         return prev;
       }
 
