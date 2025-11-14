@@ -470,12 +470,21 @@
             gap: 6px;
             font-size: 12px;
             color: #777;
+            align-items: center;
         }
 
         .meta-item {
             display: flex;
             align-items: center;
             gap: 3px;
+        }
+
+        .meta-separator {
+            width: 4px;
+            height: 4px;
+            border-radius: 999px;
+            background: #d0d0d0;
+            display: inline-flex;
         }
 
         .meta-item svg {
