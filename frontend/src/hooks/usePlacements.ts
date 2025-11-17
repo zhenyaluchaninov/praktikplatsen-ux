@@ -6,6 +6,7 @@ import { useAdded } from './useAdded';
 import { useNotifications } from './useNotifications';
 
 const APPLICATION_LIMIT = 10;
+const APPLICATION_LIMIT_MESSAGE = `You can only apply to ${APPLICATION_LIMIT} placements`;
 const HOME_AREA_REQUIREMENT = 3;
 const HOME_REQUIREMENT_TOOLTIP =
   'You must apply for at least 3 placements in your own area before applying elsewhere. This ensures local students get priority for local placements.';
@@ -193,11 +194,7 @@ const sortPlacements = (placements: Placement[], sortOption: SortOption) => {
 export const usePlacements = () => {
   const {
     added,
-    selectedAdded,
     toggleAddedItem: toggleAddedState,
-    toggleAddedSelection,
-    selectAllAdded,
-    deselectAllAdded,
     removeAddedItem: removeAddedState,
     removeAddedItems,
     ensureAddedItem,
@@ -408,17 +405,17 @@ export const usePlacements = () => {
     [appliedPlacements],
   );
 
-  const selectedAddedHomeCount = useMemo(
-    () => selectedAdded.reduce((count, id) => count + (placementsById.get(id)?.homeArea ? 1 : 0), 0),
-    [selectedAdded, placementsById],
+  const addedHomeCount = useMemo(
+    () => addedPlacements.filter((placement) => placement.homeArea).length,
+    [addedPlacements],
   );
 
   const homeRequirementMet = homeApplicationsCount >= HOME_AREA_REQUIREMENT;
-  const homeRequirementSatisfiedAfterSelection =
-    homeRequirementMet || homeApplicationsCount + selectedAddedHomeCount >= HOME_AREA_REQUIREMENT;
-  const homeRequirementBlocking = !homeRequirementSatisfiedAfterSelection;
+  const homeRequirementSatisfiedWithAdded =
+    homeRequirementMet || homeApplicationsCount + addedHomeCount >= HOME_AREA_REQUIREMENT;
+  const homeRequirementBlocking = !homeRequirementSatisfiedWithAdded;
   const homeRequirementDisplayCount = Math.min(
-    homeApplicationsCount + selectedAddedHomeCount,
+    homeApplicationsCount + addedHomeCount,
     HOME_AREA_REQUIREMENT,
   );
   const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_AREA_REQUIREMENT}`;
@@ -434,17 +431,23 @@ export const usePlacements = () => {
   const toggleAdded = useCallback(
     (id: number) => {
       const isCurrentlyAdded = added.includes(id);
-      if (!isCurrentlyAdded && applications.includes(id)) {
-        showNotification('Already applied', 'This placement is already in your Applied tab');
-        return;
+      if (!isCurrentlyAdded) {
+        if (applications.includes(id)) {
+          showNotification('Already applied', 'This placement is already in your Applied tab');
+          return;
+        }
+        if (added.length >= APPLICATION_LIMIT) {
+          showNotification('Added list full', `You can only keep ${APPLICATION_LIMIT} placements in Added`, 'error');
+          return;
+        }
       }
       toggleAddedState(id);
       showNotification(
         isCurrentlyAdded ? 'Removed from Added list' : 'Added to Added list',
-        isCurrentlyAdded ? '' : 'Check the box to select it for application',
+        isCurrentlyAdded ? '' : `You can save up to ${APPLICATION_LIMIT} placements`,
       );
     },
-    [applications, added, toggleAddedState, showNotification],
+    [added, applications, showNotification, toggleAddedState],
   );
 
   const removeAdded = useCallback(
@@ -470,7 +473,7 @@ export const usePlacements = () => {
     (id: number) => {
       setApplications((prev) => {
         if (prev.length >= APPLICATION_LIMIT) {
-          showNotification('Application limit reached', 'You can only apply to 10 placements');
+          showNotification('Application limit reached', APPLICATION_LIMIT_MESSAGE);
           return prev;
         }
         if (prev.includes(id)) {
@@ -486,42 +489,42 @@ export const usePlacements = () => {
   );
 
   const applyToSelected = useCallback(() => {
-    if (selectedAdded.length === 0) {
-      showNotification('No added placements selected', 'Use the Select buttons to pick added placements');
+    if (added.length === 0) {
+      showNotification('No added placements', 'Add placements to your list before applying');
       return;
     }
 
-    if (!homeRequirementSatisfiedAfterSelection) {
+    if (!homeRequirementSatisfiedWithAdded) {
       showNotification(
         'Apply in your area first',
-        `Select placements in your area until you reach ${HOME_AREA_REQUIREMENT} applications.`,
+        `Add placements in your area until you reach ${HOME_AREA_REQUIREMENT} total.`,
       );
       return;
     }
 
     setApplications((prev) => {
       if (prev.length >= APPLICATION_LIMIT) {
-        showNotification('Application limit reached', 'You can only apply to 10 placements');
+        showNotification('Application limit reached', APPLICATION_LIMIT_MESSAGE);
         return prev;
       }
 
       const remainingSlots = APPLICATION_LIMIT - prev.length;
-      const alreadyAppliedSelections = selectedAdded.filter((id) => prev.includes(id));
-      const pendingSelections = selectedAdded.filter((id) => !prev.includes(id));
-
+      const alreadyAppliedSelections = added.filter((id) => prev.includes(id));
       if (alreadyAppliedSelections.length > 0) {
         removeAddedItems(alreadyAppliedSelections);
       }
 
+      const pendingSelections = added.filter((id) => !prev.includes(id));
+
       if (pendingSelections.length === 0) {
-        showNotification('Already applied', 'Selected placements are already in your Applied tab');
+        showNotification('Already applied', 'All added placements are already in your Applied tab');
         return prev;
       }
 
       const toApply = pendingSelections.slice(0, remainingSlots);
 
       if (toApply.length === 0) {
-        showNotification('Application limit reached', 'You can only apply to 10 placements');
+        showNotification('Application limit reached', APPLICATION_LIMIT_MESSAGE);
         return prev;
       }
 
@@ -529,11 +532,17 @@ export const usePlacements = () => {
       showNotification(`Applied to ${toApply.length} placements!`, 'Check "Applied" tab to see them');
       return [...prev, ...toApply];
     });
-  }, [homeRequirementSatisfiedAfterSelection, removeAddedItems, selectedAdded, showNotification]);
+  }, [added, homeRequirementSatisfiedWithAdded, removeAddedItems, showNotification]);
 
   const withdrawApplication = useCallback(
     (id: number) => {
       if (!window.confirm('Are you sure you want to withdraw this application?')) {
+        return;
+      }
+
+      const placementAlreadyAdded = added.includes(id);
+      if (!placementAlreadyAdded && added.length >= APPLICATION_LIMIT) {
+        showNotification('Added list full', `Remove a placement from Added before withdrawing another one.`, 'error');
         return;
       }
 
@@ -546,7 +555,7 @@ export const usePlacements = () => {
         return prev.filter((appId) => appId !== id);
       });
     },
-    [ensureAddedItem, showNotification],
+    [added, ensureAddedItem, showNotification],
   );
 
   const toggleFilterOption = useCallback((groupId: FilterGroupId, optionId: string) => {
@@ -584,8 +593,8 @@ export const usePlacements = () => {
   const progressPercentage = Math.min(100, (applications.length / APPLICATION_LIMIT) * 100);
   const canApplyMore = applications.length < APPLICATION_LIMIT;
   const progressComplete = !canApplyMore;
-  const applyButtonLabel = `Apply to Selected (${selectedAdded.length})`;
-  const applyButtonDisabled = selectedAdded.length === 0 || !canApplyMore;
+  const applyButtonLabel = 'Apply';
+  const applyButtonDisabled = added.length === 0 || !canApplyMore;
   const resultsLabel = `Showing ${sortedPlacements.length} ${sortedPlacements.length === 1 ? 'placement' : 'placements'}`;
 
   return {
@@ -596,7 +605,6 @@ export const usePlacements = () => {
     addedPlacements,
     applications,
     appliedPlacements,
-    selectedAdded,
     activeTab,
     setActiveTab,
     notification,
@@ -606,9 +614,6 @@ export const usePlacements = () => {
     toggleWishlist,
     toggleWishlistOnly,
     toggleAdded,
-    toggleAddedSelection,
-    selectAllAdded,
-    deselectAllAdded,
     removeAdded,
     applyToPlacement,
     applyToSelected,

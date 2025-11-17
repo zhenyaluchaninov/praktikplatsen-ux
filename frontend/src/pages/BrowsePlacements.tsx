@@ -23,7 +23,6 @@ const BrowsePlacements = () => {
     added,
     applications,
     addedPlacements,
-    selectedAdded,
     appliedPlacements,
     activeTab,
     setActiveTab,
@@ -34,9 +33,6 @@ const BrowsePlacements = () => {
     toggleWishlist,
     toggleWishlistOnly,
     toggleAdded,
-    toggleAddedSelection,
-    selectAllAdded,
-    deselectAllAdded,
     removeAdded,
     applyToSelected,
     withdrawApplication,
@@ -343,11 +339,7 @@ const BrowsePlacements = () => {
                 applicationsCount={applicationsCount}
                 addedPlacements={addedPlacements}
                 appliedPlacements={appliedPlacements}
-                selectedAdded={selectedAdded}
                 onTabChange={setActiveTab}
-                onToggleAddedSelection={toggleAddedSelection}
-                onSelectAllAdded={selectAllAdded}
-                onDeselectAllAdded={deselectAllAdded}
                 onRemoveAdded={removeAdded}
                 onApplyToSelected={applyToSelected}
                 onWithdrawApplication={withdrawApplication}
@@ -362,21 +354,17 @@ const BrowsePlacements = () => {
             </section>
           )}
           {!isMobile && (
-            <RightSidebar
-              activeTab={activeTab}
-              addedCount={addedCount}
-              applicationsCount={applicationsCount}
-              addedPlacements={addedPlacements}
-              appliedPlacements={appliedPlacements}
-              selectedAdded={selectedAdded}
-              onTabChange={setActiveTab}
-              onToggleAddedSelection={toggleAddedSelection}
-              onSelectAllAdded={selectAllAdded}
-              onDeselectAllAdded={deselectAllAdded}
-              onRemoveAdded={removeAdded}
-              onApplyToSelected={applyToSelected}
-              onWithdrawApplication={withdrawApplication}
-              onShowInfo={openModal}
+              <RightSidebar
+                activeTab={activeTab}
+                addedCount={addedCount}
+                applicationsCount={applicationsCount}
+                addedPlacements={addedPlacements}
+                appliedPlacements={appliedPlacements}
+                onTabChange={setActiveTab}
+                onRemoveAdded={removeAdded}
+                onApplyToSelected={applyToSelected}
+                onWithdrawApplication={withdrawApplication}
+                onShowInfo={openModal}
               applyButtonLabel={applyButtonLabel}
               applyButtonDisabled={applyButtonDisabled}
               homeRequirement={homeRequirement}
@@ -389,6 +377,7 @@ const BrowsePlacements = () => {
             key={`exiting-${exitingNotification.id}`}
             title={exitingNotification.title}
             message={exitingNotification.message}
+            variant={exitingNotification.variant}
             onClose={clearNotification}
             visible={false}
           />
@@ -398,6 +387,7 @@ const BrowsePlacements = () => {
             key={notification.id}
             title={notification.title}
             message={notification.message}
+            variant={notification.variant}
             onClose={clearNotification}
             visible={notificationVisible}
           />

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
-import { AnimatePresence, easeInOut, motion, type Transition } from 'framer-motion';
+import { easeInOut, motion, type Transition } from 'framer-motion';
 
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
@@ -21,11 +21,7 @@ export type SavedPanelsProps = {
   applicationsCount: number;
   addedPlacements: Placement[];
   appliedPlacements: Placement[];
-  selectedAdded: number[];
   onTabChange: (tab: 'added' | 'applications') => void;
-  onToggleAddedSelection: (id: number) => void;
-  onSelectAllAdded: () => void;
-  onDeselectAllAdded: () => void;
   onRemoveAdded: (id: number) => void;
   onApplyToSelected: () => void;
   onWithdrawApplication: (id: number) => void;
@@ -38,16 +34,6 @@ export type SavedPanelsProps = {
   showMobileHeading?: boolean;
   mobileMode?: boolean;
 };
-
-type HintPositions = {
-  start: { x: number; y: number };
-  end: { x: number; y: number };
-};
-
-const HINT_AXIS_OFFSET_X = -50;
-const HINT_START_OFFSET_FROM_BOTTOM = 40;
-const HINT_END_OFFSET_FROM_TOP = 60;
-const BANNER_PULSE_DELAY = 200;
 
 const EmptyAddedState = () => (
   <div className="empty-state">
@@ -75,9 +61,11 @@ const EmptyApplicationsState = () => (
       </svg>
     </div>
     <p>No applications yet</p>
-    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select added placements and click &quot;Apply to Selected&quot;</p>
+    <p style={{ fontSize: '12px', marginTop: '8px' }}>Add placements and click &quot;Apply to Added&quot; when ready</p>
   </div>
 );
+
+const REQUIREMENT_HINT_DURATION = 2000;
 
 export const SavedPanels = ({
   activeTab,
@@ -85,11 +73,7 @@ export const SavedPanels = ({
   applicationsCount,
   addedPlacements,
   appliedPlacements,
-  selectedAdded,
   onTabChange,
-  onToggleAddedSelection,
-  onSelectAllAdded,
-  onDeselectAllAdded,
   onRemoveAdded,
   onApplyToSelected,
   onWithdrawApplication,
@@ -102,61 +86,31 @@ export const SavedPanels = ({
   showMobileHeading = true,
   mobileMode = false,
 }: SavedPanelsProps) => {
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const requirementHintTimeoutRef = useRef<number | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
-  const [hintPositions, setHintPositions] = useState<HintPositions | null>(null);
   const [hintKey, setHintKey] = useState(0);
-  const bannerPulseTimeoutRef = useRef<number | null>(null);
-  const [bannerKey, setBannerKey] = useState(0);
-  const requirementHintActive = hintVisible;
 
   const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
-  const shouldPulseBanner = bannerKey > 0 && hintVisible;
-  const bannerAnimation = shouldPulseBanner ? { y: [0, -4, 0] } : { y: 0 };
-  const bannerTransition: Transition = { duration: 0.6, repeat: 1, ease: easeInOut };
+  const bannerAnimation = hintVisible
+    ? { x: [0, -8, 8, -6, 6, -4, 4, 0], rotate: [0, -0.8, 0.8, -0.4, 0.4, -0.2, 0.2, 0] }
+    : { x: 0, rotate: 0 };
+  const bannerTransition: Transition = { duration: 0.6, ease: easeInOut };
 
   const triggerRequirementHint = useCallback(() => {
-    if (!panelRef.current) {
-      return;
-    }
-    const rect = panelRef.current.getBoundingClientRect();
-    const axisX = rect.width / 2 + HINT_AXIS_OFFSET_X;
-    const startY = rect.height - HINT_START_OFFSET_FROM_BOTTOM;
-    const endY = HINT_END_OFFSET_FROM_TOP;
-    const clampedStartY = Math.max(0, Math.min(rect.height, startY));
-    const clampedEndY = Math.max(0, Math.min(rect.height, endY));
-
-    const positions: HintPositions = {
-      start: { x: axisX, y: clampedStartY },
-      end: { x: axisX, y: clampedEndY },
-    };
-
     if (requirementHintTimeoutRef.current) {
       window.clearTimeout(requirementHintTimeoutRef.current);
       requirementHintTimeoutRef.current = null;
     }
-    if (bannerPulseTimeoutRef.current) {
-      window.clearTimeout(bannerPulseTimeoutRef.current);
-      bannerPulseTimeoutRef.current = null;
-    }
 
-    setHintPositions(positions);
     setHintVisible(true);
     setHintKey((prev) => prev + 1);
-    setBannerKey(0);
 
     requirementHintTimeoutRef.current = window.setTimeout(() => {
       setHintVisible(false);
       requirementHintTimeoutRef.current = null;
-    }, 3000);
-
-    bannerPulseTimeoutRef.current = window.setTimeout(() => {
-      setBannerKey((prev) => prev + 1);
-      bannerPulseTimeoutRef.current = null;
-    }, BANNER_PULSE_DELAY);
+    }, REQUIREMENT_HINT_DURATION);
   }, []);
 
   useEffect(
@@ -164,10 +118,6 @@ export const SavedPanels = ({
       if (requirementHintTimeoutRef.current) {
         window.clearTimeout(requirementHintTimeoutRef.current);
         requirementHintTimeoutRef.current = null;
-      }
-      if (bannerPulseTimeoutRef.current) {
-        window.clearTimeout(bannerPulseTimeoutRef.current);
-        bannerPulseTimeoutRef.current = null;
       }
     },
     [],
@@ -178,10 +128,6 @@ export const SavedPanels = ({
       if (requirementHintTimeoutRef.current) {
         window.clearTimeout(requirementHintTimeoutRef.current);
         requirementHintTimeoutRef.current = null;
-      }
-      if (bannerPulseTimeoutRef.current) {
-        window.clearTimeout(bannerPulseTimeoutRef.current);
-        bannerPulseTimeoutRef.current = null;
       }
       setHintVisible(false);
     }
@@ -203,13 +149,10 @@ export const SavedPanels = ({
   const applicationsTabDisplay = activeTab === 'applications' ? (mobileMode ? 'block' : 'flex') : 'none';
   const buttonStateClass =
     applyButtonDisabled || !homeRequirement.ready ? 'btn-submit-all--neutral' : 'btn-submit-all--ready';
-  const buttonClasses = ['btn-submit-all', buttonStateClass, requirementHintActive ? 'btn-submit-all--attention' : '']
-    .filter(Boolean)
-    .join(' ');
+  const buttonClasses = ['btn-submit-all', buttonStateClass].filter(Boolean).join(' ');
 
   const submitButton = (
     <button
-      key={hintKey}
       type="button"
       className={buttonClasses}
       id="applyAllBtn"
@@ -221,15 +164,57 @@ export const SavedPanels = ({
     </button>
   );
 
-  const submitButtonWithTooltip = submitButton;
+  const requirementBanner = (
+    <div
+      className="saved-panel__apply-banner"
+      style={{
+        marginBottom: mobileMode ? '4px' : '6px',
+      }}
+    >
+      <Tooltip content={homeRequirement.tooltip}>
+        <motion.div
+          key={`banner-${hintKey}`}
+          className={bannerClasses}
+          animate={bannerAnimation}
+          transition={bannerTransition}
+          style={{ overflow: 'visible', padding: '0 12px' }}
+        >
+          <span className="home-requirement-banner-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </span>
+          <span className="home-requirement-text">{homeRequirement.text}</span>
+        </motion.div>
+      </Tooltip>
+    </div>
+  );
+
+  const submitContent = (
+    <>
+      {requirementBanner}
+      {submitButton}
+    </>
+  );
+
+  const submitWrapperStyle = {
+    overflow: 'visible',
+    padding: mobileMode ? '0 10px' : '0 14px',
+  };
   const submitSection = mobileMode ? (
-    <div className="saved-panels__mobile-submit">{submitButtonWithTooltip}</div>
+    <div className="saved-panels__mobile-submit" style={submitWrapperStyle}>
+      {submitContent}
+    </div>
   ) : (
-    <div className="saved-panel__footer">{submitButtonWithTooltip}</div>
+    <div className="saved-panel__footer" style={submitWrapperStyle}>
+      {submitContent}
+    </div>
   );
 
   return (
-    <div className={panelClassName} ref={panelRef}>
+    <div className={panelClassName}>
       {showTabs ? (
         <div className="sidebar-tabs">
           <button type="button" className={`tab ${activeTab === 'added' ? 'active' : ''}`} onClick={() => onTabChange('added')}>
@@ -256,78 +241,12 @@ export const SavedPanels = ({
       ) : null}
 
       <div id="addedTab" className="tab-content" style={{ display: addedTabDisplay }}>
-        <div className="saved-panel__header">
-          <Tooltip content={homeRequirement.tooltip}>
-            <motion.div
-              key={bannerKey}
-              className={bannerClasses}
-              animate={bannerAnimation}
-              transition={bannerTransition}
-            >
-              <span className="home-requirement-banner-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </span>
-              <span className="home-requirement-text">{homeRequirement.text}</span>
-            </motion.div>
-          </Tooltip>
-
-          <div
-            className="saved-controls"
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '12px',
-              paddingBottom: '8px',
-              marginBottom: '12px',
-              borderBottom: '1px solid #f0f0f0',
-            }}
-          >
-            <span style={{ fontSize: '13px', color: '#666', fontWeight: 600 }}>Select placements to apply:</span>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={onSelectAllAdded}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#FF9933',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                }}
-              >
-                Select All
-              </button>
-              <button
-                type="button"
-                onClick={onDeselectAllAdded}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#999',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                }}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div className="saved-panel__scroll">
           <div className="saved-list" id="addedList">
             {addedEmpty ? (
               <EmptyAddedState />
             ) : (
               addedPlacements.map((placement) => {
-                const isSelected = selectedAdded.includes(placement.id);
                 const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
@@ -336,7 +255,7 @@ export const SavedPanels = ({
                 };
                 return (
                   <div
-                    className={`saved-item saved-card saved-card--added ${isSelected ? 'selected' : ''}`}
+                    className="saved-item saved-card saved-card--added"
                     key={placement.id}
                     role="button"
                     tabIndex={0}
@@ -360,51 +279,22 @@ export const SavedPanels = ({
                         </div>
                       </div>
                     </div>
-                    <div className="saved-card__footer saved-card__footer--added">
+                    <div className="saved-card__footer saved-card__footer--applied">
                       <button
                         type="button"
-                        className={`saved-card__primary-btn ${isSelected ? 'is-selected' : ''}`}
+                        className="saved-card__pill danger"
+                        title="Remove from Added list"
                         onClick={(event) => {
                           event.stopPropagation();
-                          onToggleAddedSelection(placement.id);
+                          onRemoveAdded(placement.id);
                         }}
-                        aria-pressed={isSelected}
                       >
-                        {isSelected ? (
-                          <>
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            Selected
-                          </>
-                        ) : (
-                          'Select'
-                        )}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Remove
                       </button>
-                      <div className="saved-card__secondary">
-                        <button
-                          type="button"
-                          className="saved-card__icon-btn danger"
-                          title="Remove from Added list"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onRemoveAdded(placement.id);
-                          }}
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      </div>
                     </div>
                   </div>
                 );
@@ -493,33 +383,7 @@ export const SavedPanels = ({
           </div>
         </div>
       </div>
-      <AnimatePresence>
-        {hintVisible && hintPositions ? (
-          <motion.div
-            key={hintKey}
-            className="home-requirement-callout"
-            initial={{
-              left: hintPositions.start.x,
-              top: hintPositions.start.y,
-              opacity: 0,
-              scale: 0.9,
-            }}
-            animate={{
-              left: hintPositions.end.x,
-              top: hintPositions.end.y,
-              opacity: 1,
-              scale: 1,
-            }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.55, ease: easeInOut }}
-          >
-            <div className="home-requirement-callout-bubble">
-              <span className="home-requirement-callout__label">Read this first!</span>
-            </div>
-            <div className="home-requirement-callout__arrow" aria-hidden="true"></div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </div>
   );
 };
+
