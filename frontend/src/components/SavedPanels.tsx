@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import type { Placement } from '../types/placement';
@@ -83,11 +83,26 @@ export const SavedPanels = ({
   showMobileHeading = true,
   mobileMode = false,
 }: SavedPanelsProps) => {
+  const [requirementBannerVisible, setRequirementBannerVisible] = useState(!homeRequirement.ready);
+
+  useEffect(() => {
+    if (!homeRequirement.ready) {
+      setRequirementBannerVisible(true);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      setRequirementBannerVisible(false);
+    }, 1000);
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [homeRequirement.ready]);
+
   const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
-  const bannerButtonSpacing = mobileMode ? -15 : -15; // gap between the banner (2) and the apply button (1)
-  const bannerContentPadding = mobileMode ? '8px 12px' : '8px 16px'; // inner padding so the text doesn't hug the border
+  const bannerButtonSpacing = mobileMode ? -15 : -15; 
+  const bannerContentPadding = mobileMode ? '8px 12px' : '8px 16px'; 
 
   const handleApplyClick = useCallback(() => {
     onApplyToSelected();
@@ -116,7 +131,7 @@ export const SavedPanels = ({
     </button>
   );
 
-  const requirementBanner = (
+  const requirementBanner = !requirementBannerVisible ? null : (
     <div
       className="saved-panel__apply-banner"
       style={{

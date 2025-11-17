@@ -7,6 +7,7 @@ import { useNotifications } from './useNotifications';
 
 const APPLICATION_LIMIT = 10;
 const APPLICATION_LIMIT_MESSAGE = `You can only apply to ${APPLICATION_LIMIT} placements`;
+const TOTAL_SELECTIONS_LIMIT_MESSAGE = `You can only have ${APPLICATION_LIMIT} placements total (Added + Applied)`;
 const HOME_AREA_REQUIREMENT = 3;
 const HOME_REQUIREMENT_TOOLTIP =
   'You must apply for at least 3 placements in your own area before applying elsewhere. This ensures local students get priority for local placements.';
@@ -232,6 +233,13 @@ export const usePlacements = () => {
     return map;
   }, [allPlacements]);
 
+  const totalTrackedPlacements = useMemo(() => {
+    const uniqueIds = new Set<number>();
+    added.forEach((id) => uniqueIds.add(id));
+    applications.forEach((id) => uniqueIds.add(id));
+    return uniqueIds.size;
+  }, [added, applications]);
+
   const industryValues = useMemo(() => {
     const values = Array.from(new Set(allPlacements.map((placement) => placement.industry)));
     return values.sort((a, b) => {
@@ -436,18 +444,21 @@ export const usePlacements = () => {
           showNotification('Already applied', 'This placement is already in your Applied tab');
           return;
         }
-        if (added.length >= APPLICATION_LIMIT) {
-          showNotification('Added list full', `You can only keep ${APPLICATION_LIMIT} placements in Added`, 'error');
+        if (totalTrackedPlacements >= APPLICATION_LIMIT) {
+          showNotification('Application limit reached', TOTAL_SELECTIONS_LIMIT_MESSAGE, 'error');
           return;
         }
       }
       toggleAddedState(id);
+      const addedFinalSlot = !isCurrentlyAdded && totalTrackedPlacements + 1 === APPLICATION_LIMIT;
+      const notificationVariant = addedFinalSlot ? 'error' : 'success';
       showNotification(
         isCurrentlyAdded ? 'Removed from Added list' : 'Added to Added list',
-        isCurrentlyAdded ? '' : `You can save up to ${APPLICATION_LIMIT} placements`,
+        isCurrentlyAdded ? '' : TOTAL_SELECTIONS_LIMIT_MESSAGE,
+        notificationVariant,
       );
     },
-    [added, applications, showNotification, toggleAddedState],
+    [added, applications, showNotification, toggleAddedState, totalTrackedPlacements],
   );
 
   const removeAdded = useCallback(
