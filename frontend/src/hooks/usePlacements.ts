@@ -480,25 +480,6 @@ export const usePlacements = () => {
     setModalPlacementId(null);
   }, []);
 
-  const applyToPlacement = useCallback(
-    (id: number) => {
-      setApplications((prev) => {
-        if (prev.length >= APPLICATION_LIMIT) {
-          showNotification('Application limit reached', APPLICATION_LIMIT_MESSAGE);
-          return prev;
-        }
-        if (prev.includes(id)) {
-          return prev;
-        }
-
-        removeAddedItems([id]);
-        showNotification('Application submitted!', 'You will be notified when reviewed');
-        return [...prev, id];
-      });
-    },
-    [removeAddedItems, showNotification],
-  );
-
   const applyToSelected = useCallback(() => {
     if (added.length === 0) {
       showNotification('No added placements', 'Add placements to your list before applying');
@@ -626,7 +607,6 @@ export const usePlacements = () => {
     toggleWishlistOnly,
     toggleAdded,
     removeAdded,
-    applyToPlacement,
     applyToSelected,
     withdrawApplication,
     modalPlacement,
@@ -641,11 +621,8 @@ export const usePlacements = () => {
       complete: progressComplete,
     },
     homeRequirement: {
-      met: homeRequirementMet,
       text: `Apply to at least ${HOME_AREA_REQUIREMENT} placements in your area (${homeRequirementDisplay})`,
       tooltip: HOME_REQUIREMENT_TOOLTIP,
-      display: homeRequirementDisplay,
-      blocking: homeRequirementBlocking,
       ready: !homeRequirementBlocking,
     },
     resultsLabel,

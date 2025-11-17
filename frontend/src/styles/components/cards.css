@@ -408,41 +408,6 @@
             color: #FF9933;
         }
 
-        .card-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .badge-new {
-            background: #E3F2FD;
-            color: #1976D2;
-        }
-
-        .badge-group {
-            background: #F3E5F5;
-            color: #7B1FA2;
-        }
-
-        .badge-almost-full {
-            background: #FFF3E0;
-            color: #F57C00;
-        }
-
-        .badge-home {
-            background: #E8F5E9;
-            color: #2E7D32;
-        }
-
         .card-title {
             font-size: 15px;
             font-weight: 700;
@@ -508,27 +473,6 @@
             padding-top: 8px;
             border-top: 1px solid #f0f0f0;
             margin-top: 8px;
-        }
-
-        .btn-apply {
-            flex: 1;
-            padding: 10px 16px;
-            background: #FF9933;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-apply:hover {
-            background: #FF6624;
-        }
-
-        .btn-apply:disabled {
-            background: #ccc;
-            cursor: not-allowed;
         }
 
         .btn-details {

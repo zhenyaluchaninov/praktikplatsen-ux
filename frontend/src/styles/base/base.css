@@ -13,18 +13,12 @@
             transition: background-color 0.3s ease;
         }
 
-        body.modal-open,
         body.menu-open {
             overflow: hidden;
         }
 
-        body.modal-open .app-scroll,
         body.menu-open .app-scroll {
             overflow: hidden;
-        }
-
-        body.header-collapsed .sticky-stack {
-            transform: translateY(calc(-1 * var(--header-height)));
         }
 
         :root {

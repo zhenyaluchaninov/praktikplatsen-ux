@@ -6,11 +6,8 @@ import { LogoImage } from './LogoImage';
 import { Tooltip } from './Tooltip';
 
 export type HomeRequirementState = {
-  met: boolean;
   text: string;
   tooltip: string;
-  display: string;
-  blocking: boolean;
   ready: boolean;
 };
 
@@ -101,9 +98,7 @@ export const SavedPanels = ({
   const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
-  const bannerButtonSpacing = mobileMode ? -15 : -15; 
-  const bannerContentPadding = mobileMode ? '8px 12px' : '8px 16px'; 
-
+  
   const handleApplyClick = useCallback(() => {
     onApplyToSelected();
   }, [onApplyToSelected]);
@@ -135,11 +130,11 @@ export const SavedPanels = ({
     <div
       className="saved-panel__apply-banner"
       style={{
-        marginBottom: `${bannerButtonSpacing}px`,
+        marginBottom: `${-15}px`,
       }}
     >
       <Tooltip content={homeRequirement.tooltip}>
-        <div className={bannerClasses} style={{ overflow: 'visible', padding: bannerContentPadding }}>
+        <div className={bannerClasses} style={{ overflow: 'visible', padding: '8px 16px' }}>
           <span className="home-requirement-banner-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>

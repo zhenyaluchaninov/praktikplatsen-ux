@@ -179,10 +179,6 @@
             background: linear-gradient(90deg, #43A047, #2E7D32);
         }
 
-        .progress-requirements {
-            display: none;
-        }
-
         .mobile-search-panel {
             display: none;
         }
