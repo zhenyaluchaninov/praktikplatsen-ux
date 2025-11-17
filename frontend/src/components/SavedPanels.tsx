@@ -160,10 +160,16 @@ export const SavedPanels = ({
     </>
   );
 
-  const submitWrapperStyle = {
-    overflow: 'visible',
-    padding: mobileMode ? '0 10px' : '0 14px',
-  };
+  const submitWrapperStyle = mobileMode
+    ? {
+        overflow: 'visible',
+        paddingLeft: '10px',
+        paddingRight: '10px',
+      }
+    : {
+        overflow: 'visible',
+        padding: '0 14px',
+      };
   const submitSection = mobileMode ? (
     <div className="saved-panels__mobile-submit" style={submitWrapperStyle}>
       {submitContent}

@@ -587,6 +587,7 @@
 
         .saved-panels--mobile .saved-panel__scroll {
             overflow: visible;
+            padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 160px);
         }
 
         .saved-panel__footer {
@@ -612,11 +613,18 @@
 
         .saved-panels__mobile-submit {
             margin-top: 20px;
+            padding: 0 10px;
         }
 
         .saved-panels--mobile .btn-submit-all {
-            width: 100%;
-            margin-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+            width: auto;
+            max-width: calc(100vw - 32px);
+            margin: 0 auto;
+            z-index: 115;
         }
 
         .btn-submit-all {
