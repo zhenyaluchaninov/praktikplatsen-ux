@@ -18,9 +18,9 @@ type MobileExploreMode = 'list' | 'search' | 'filters';
 const BrowsePlacements = () => {
   const {
     placements,
-    wishlist,
-    wishlistPlacements,
-    selectedWishlist,
+    added,
+    addedPlacements,
+    selectedAdded,
     appliedPlacements,
     activeTab,
     setActiveTab,
@@ -28,11 +28,11 @@ const BrowsePlacements = () => {
     exitingNotification,
     notificationVisible,
     clearNotification,
-    toggleWishlist,
-    toggleWishlistSelection,
-    selectAllWishlist,
-    deselectAllWishlist,
-    removeWishlist,
+    toggleAdded,
+    toggleAddedSelection,
+    selectAllAdded,
+    deselectAllAdded,
+    removeAdded,
     applyToSelected,
     withdrawApplication,
     modalPlacement,
@@ -42,7 +42,7 @@ const BrowsePlacements = () => {
     closeCompletionModal,
     progress,
     resultsLabel,
-    wishlistCount,
+    addedCount,
     applicationsCount,
     applyButtonLabel,
     applyButtonDisabled,
@@ -178,8 +178,8 @@ const BrowsePlacements = () => {
       if (!isMobile) {
         return;
       }
-      if (view === 'wishlist' && activeTab !== 'wishlist') {
-        setActiveTab('wishlist');
+      if (view === 'added' && activeTab !== 'added') {
+        setActiveTab('added');
       } else if (view === 'applied' && activeTab !== 'applications') {
         setActiveTab('applications');
       }
@@ -271,8 +271,8 @@ const BrowsePlacements = () => {
           {showPlacementsGrid && (
             <PlacementsGrid
               placements={placements}
-              wishlist={wishlist}
-              onToggleWishlist={toggleWishlist}
+              added={added}
+              onToggleAdded={toggleAdded}
               onShowDetails={openModal}
               resultsLabel={resultsLabel}
               sortOption={sortOption}
@@ -320,20 +320,20 @@ const BrowsePlacements = () => {
           {isMobile && mobileView !== 'explore' && (
             <section
               className={`mobile-saved-panels mobile-saved-panels--${mobileView}`}
-              aria-label={mobileView === 'wishlist' ? 'Wishlist' : 'Applied'}
+              aria-label={mobileView === 'added' ? 'Added' : 'Applied'}
             >
               <SavedPanels
                 activeTab={activeTab}
-                wishlistCount={wishlistCount}
+                addedCount={addedCount}
                 applicationsCount={applicationsCount}
-                wishlistPlacements={wishlistPlacements}
+                addedPlacements={addedPlacements}
                 appliedPlacements={appliedPlacements}
-                selectedWishlist={selectedWishlist}
+                selectedAdded={selectedAdded}
                 onTabChange={setActiveTab}
-                onToggleWishlistSelection={toggleWishlistSelection}
-                onSelectAllWishlist={selectAllWishlist}
-                onDeselectAllWishlist={deselectAllWishlist}
-                onRemoveWishlist={removeWishlist}
+                onToggleAddedSelection={toggleAddedSelection}
+                onSelectAllAdded={selectAllAdded}
+                onDeselectAllAdded={deselectAllAdded}
+                onRemoveAdded={removeAdded}
                 onApplyToSelected={applyToSelected}
                 onWithdrawApplication={withdrawApplication}
                 onShowInfo={openModal}
@@ -349,16 +349,16 @@ const BrowsePlacements = () => {
           {!isMobile && (
             <RightSidebar
               activeTab={activeTab}
-              wishlistCount={wishlistCount}
+              addedCount={addedCount}
               applicationsCount={applicationsCount}
-              wishlistPlacements={wishlistPlacements}
+              addedPlacements={addedPlacements}
               appliedPlacements={appliedPlacements}
-              selectedWishlist={selectedWishlist}
+              selectedAdded={selectedAdded}
               onTabChange={setActiveTab}
-              onToggleWishlistSelection={toggleWishlistSelection}
-              onSelectAllWishlist={selectAllWishlist}
-              onDeselectAllWishlist={deselectAllWishlist}
-              onRemoveWishlist={removeWishlist}
+              onToggleAddedSelection={toggleAddedSelection}
+              onSelectAllAdded={selectAllAdded}
+              onDeselectAllAdded={deselectAllAdded}
+              onRemoveAdded={removeAdded}
               onApplyToSelected={applyToSelected}
               onWithdrawApplication={withdrawApplication}
               onShowInfo={openModal}
@@ -396,7 +396,7 @@ const BrowsePlacements = () => {
           onChange={handleMobileViewChange}
           counts={{
             explore: placements.length,
-            wishlist: wishlistCount,
+            added: addedCount,
             applied: applicationsCount,
           }}
         />

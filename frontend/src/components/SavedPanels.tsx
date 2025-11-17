@@ -16,17 +16,17 @@ export type HomeRequirementState = {
 };
 
 export type SavedPanelsProps = {
-  activeTab: 'wishlist' | 'applications';
-  wishlistCount: number;
+  activeTab: 'added' | 'applications';
+  addedCount: number;
   applicationsCount: number;
-  wishlistPlacements: Placement[];
+  addedPlacements: Placement[];
   appliedPlacements: Placement[];
-  selectedWishlist: number[];
-  onTabChange: (tab: 'wishlist' | 'applications') => void;
-  onToggleWishlistSelection: (id: number) => void;
-  onSelectAllWishlist: () => void;
-  onDeselectAllWishlist: () => void;
-  onRemoveWishlist: (id: number) => void;
+  selectedAdded: number[];
+  onTabChange: (tab: 'added' | 'applications') => void;
+  onToggleAddedSelection: (id: number) => void;
+  onSelectAllAdded: () => void;
+  onDeselectAllAdded: () => void;
+  onRemoveAdded: (id: number) => void;
   onApplyToSelected: () => void;
   onWithdrawApplication: (id: number) => void;
   onShowInfo: (id: number) => void;
@@ -49,15 +49,15 @@ const HINT_START_OFFSET_FROM_BOTTOM = 40;
 const HINT_END_OFFSET_FROM_TOP = 60;
 const BANNER_PULSE_DELAY = 200;
 
-const EmptyWishlistState = () => (
+const EmptyAddedState = () => (
   <div className="empty-state">
     <div className="empty-state-icon">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
       </svg>
     </div>
-    <p>No wishlist yet</p>
-    <p style={{ fontSize: '12px', marginTop: '8px' }}>Click the heart icon on placements to save them here</p>
+    <p>Nothing added yet</p>
+    <p style={{ fontSize: '12px', marginTop: '8px' }}>Click the heart icon on placements to add them here</p>
   </div>
 );
 
@@ -73,22 +73,22 @@ const EmptyApplicationsState = () => (
       </svg>
     </div>
     <p>No applications yet</p>
-    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select wishlist placements and click &quot;Apply to Selected&quot;</p>
+    <p style={{ fontSize: '12px', marginTop: '8px' }}>Select added placements and click &quot;Apply to Selected&quot;</p>
   </div>
 );
 
 export const SavedPanels = ({
   activeTab,
-  wishlistCount,
+  addedCount,
   applicationsCount,
-  wishlistPlacements,
+  addedPlacements,
   appliedPlacements,
-  selectedWishlist,
+  selectedAdded,
   onTabChange,
-  onToggleWishlistSelection,
-  onSelectAllWishlist,
-  onDeselectAllWishlist,
-  onRemoveWishlist,
+  onToggleAddedSelection,
+  onSelectAllAdded,
+  onDeselectAllAdded,
+  onRemoveAdded,
   onApplyToSelected,
   onWithdrawApplication,
   onShowInfo,
@@ -109,7 +109,7 @@ export const SavedPanels = ({
   const [bannerKey, setBannerKey] = useState(0);
   const requirementHintActive = hintVisible;
 
-  const wishlistEmpty = wishlistPlacements.length === 0;
+  const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
   const shouldPulseBanner = bannerKey > 0 && hintVisible;
@@ -193,11 +193,11 @@ export const SavedPanels = ({
     onApplyToSelected();
   }, [homeRequirement.blocking, onApplyToSelected, triggerRequirementHint]);
 
-  const activeHeading = heading ?? (activeTab === 'wishlist' ? 'Wishlist' : 'Applied');
-  const activeHeadingCount = activeTab === 'wishlist' ? wishlistCount : applicationsCount;
+  const activeHeading = heading ?? (activeTab === 'added' ? 'Added' : 'Applied');
+  const activeHeadingCount = activeTab === 'added' ? addedCount : applicationsCount;
 
   const panelClassName = ['saved-panels', mobileMode ? 'saved-panels--mobile' : ''].filter(Boolean).join(' ');
-  const wishlistTabDisplay = activeTab === 'wishlist' ? (mobileMode ? 'block' : 'flex') : 'none';
+  const addedTabDisplay = activeTab === 'added' ? (mobileMode ? 'block' : 'flex') : 'none';
   const applicationsTabDisplay = activeTab === 'applications' ? (mobileMode ? 'block' : 'flex') : 'none';
   const buttonClasses = [
     'btn-submit-all',
@@ -231,10 +231,10 @@ export const SavedPanels = ({
     <div className={panelClassName} ref={panelRef}>
       {showTabs ? (
         <div className="sidebar-tabs">
-          <button type="button" className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`} onClick={() => onTabChange('wishlist')}>
-            Wishlist
-            <span className="tab-count" id="wishlistCount">
-              {wishlistCount}
+          <button type="button" className={`tab ${activeTab === 'added' ? 'active' : ''}`} onClick={() => onTabChange('added')}>
+            Added
+            <span className="tab-count" id="addedCount">
+              {addedCount}
             </span>
           </button>
           <button type="button" className={`tab ${activeTab === 'applications' ? 'active' : ''}`} onClick={() => onTabChange('applications')}>
@@ -254,7 +254,7 @@ export const SavedPanels = ({
         </div>
       ) : null}
 
-      <div id="wishlistTab" className="tab-content" style={{ display: wishlistTabDisplay }}>
+      <div id="addedTab" className="tab-content" style={{ display: addedTabDisplay }}>
         <div className="saved-panel__header">
           <div
             className="saved-controls"
@@ -271,7 +271,7 @@ export const SavedPanels = ({
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 type="button"
-                onClick={onSelectAllWishlist}
+                onClick={onSelectAllAdded}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -285,7 +285,7 @@ export const SavedPanels = ({
               </button>
               <button
                 type="button"
-                onClick={onDeselectAllWishlist}
+                onClick={onDeselectAllAdded}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -320,12 +320,12 @@ export const SavedPanels = ({
         </div>
 
         <div className="saved-panel__scroll">
-          <div className="saved-list" id="wishlistList">
-            {wishlistEmpty ? (
-              <EmptyWishlistState />
+          <div className="saved-list" id="addedList">
+            {addedEmpty ? (
+              <EmptyAddedState />
             ) : (
-              wishlistPlacements.map((placement) => {
-                const isSelected = selectedWishlist.includes(placement.id);
+              addedPlacements.map((placement) => {
+                const isSelected = selectedAdded.includes(placement.id);
                 const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
@@ -334,7 +334,7 @@ export const SavedPanels = ({
                 };
                 return (
                   <div
-                    className={`saved-item saved-card saved-card--wishlist ${isSelected ? 'selected' : ''}`}
+                    className={`saved-item saved-card saved-card--added ${isSelected ? 'selected' : ''}`}
                     key={placement.id}
                     role="button"
                     tabIndex={0}
@@ -358,13 +358,13 @@ export const SavedPanels = ({
                         </div>
                       </div>
                     </div>
-                    <div className="saved-card__footer saved-card__footer--wishlist">
+                    <div className="saved-card__footer saved-card__footer--added">
                       <button
                         type="button"
                         className={`saved-card__primary-btn ${isSelected ? 'is-selected' : ''}`}
                         onClick={(event) => {
                           event.stopPropagation();
-                          onToggleWishlistSelection(placement.id);
+                          onToggleAddedSelection(placement.id);
                         }}
                         aria-pressed={isSelected}
                       >
@@ -391,10 +391,10 @@ export const SavedPanels = ({
                         <button
                           type="button"
                           className="saved-card__icon-btn danger"
-                          title="Remove from wishlist"
+                          title="Remove from Added list"
                           onClick={(event) => {
                             event.stopPropagation();
-                            onRemoveWishlist(placement.id);
+                            onRemoveAdded(placement.id);
                           }}
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

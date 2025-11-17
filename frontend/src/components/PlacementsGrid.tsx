@@ -7,8 +7,8 @@ import { SortControl } from './SortControl';
 
 interface PlacementsGridProps {
   placements: Placement[];
-  wishlist: number[];
-  onToggleWishlist: (id: number) => void;
+  added: number[];
+  onToggleAdded: (id: number) => void;
   onShowDetails: (id: number) => void;
   resultsLabel: string;
   sortOption: SortOption;
@@ -45,8 +45,8 @@ const highlightMatch = (text: string, query: string): ReactNode => {
 
 export const PlacementsGrid = ({
   placements,
-  wishlist,
-  onToggleWishlist,
+  added,
+  onToggleAdded,
   onShowDetails,
   resultsLabel,
   sortOption,
@@ -67,7 +67,7 @@ export const PlacementsGrid = ({
 
       <div className="cards-grid" id="cardsGrid">
         {placements.map((placement) => {
-          const isWishlisted = wishlist.includes(placement.id);
+          const isAdded = added.includes(placement.id);
           return (
             <div className="placement-card" key={placement.id}>
               <div className="card-header">
@@ -81,14 +81,14 @@ export const PlacementsGrid = ({
                 <div className="card-actions">
                   <button
                     type="button"
-                    className={`icon-btn ${isWishlisted ? 'wishlisted' : ''}`}
-                    onClick={() => onToggleWishlist(placement.id)}
-                    title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    className={`icon-btn ${isAdded ? 'added' : ''}`}
+                    onClick={() => onToggleAdded(placement.id)}
+                    title={isAdded ? 'Remove from Added list' : 'Add to Added list'}
                   >
                     <svg
                       className="heart-icon"
                       viewBox="0 0 24 24"
-                      fill={isWishlisted ? 'currentColor' : 'none'}
+                      fill={isAdded ? 'currentColor' : 'none'}
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"

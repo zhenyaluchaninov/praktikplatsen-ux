@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import placementsData from '../data/placements.json';
 import type { Placement } from '../types/placement';
-import { useWishlist } from './useWishlist';
+import { useAdded } from './useAdded';
 import { useNotifications } from './useNotifications';
 
 const APPLICATION_LIMIT = 10;
@@ -30,7 +30,7 @@ type FilterGroupView = {
 
 const placementsFromJson = placementsData as Placement[];
 
-const INITIAL_WISHLIST: number[] = [];
+const INITIAL_ADDED: number[] = [];
 const INITIAL_APPLICATIONS: number[] = [];
 
 const FILTER_GROUPS: FilterGroupId[] = ['industry', 'area', 'type', 'availability'];
@@ -192,20 +192,20 @@ const sortPlacements = (placements: Placement[], sortOption: SortOption) => {
 
 export const usePlacements = () => {
   const {
-    wishlist,
-    selectedWishlist,
-    toggleWishlistItem: toggleWishlistState,
-    toggleWishlistSelection,
-    selectAllWishlist,
-    deselectAllWishlist,
-    removeWishlistItem: removeWishlistState,
-    removeWishlistItems,
-  } = useWishlist(INITIAL_WISHLIST);
+    added,
+    selectedAdded,
+    toggleAddedItem: toggleAddedState,
+    toggleAddedSelection,
+    selectAllAdded,
+    deselectAllAdded,
+    removeAddedItem: removeAddedState,
+    removeAddedItems,
+  } = useAdded(INITIAL_ADDED);
 
   const { notification, exitingNotification, isNotificationVisible, showNotification, clearNotification } = useNotifications();
 
   const [applications, setApplications] = useState<number[]>(INITIAL_APPLICATIONS);
-  const [activeTab, setActiveTab] = useState<'wishlist' | 'applications'>('wishlist');
+  const [activeTab, setActiveTab] = useState<'added' | 'applications'>('added');
   const [modalPlacementId, setModalPlacementId] = useState<number | null>(null);
   const [allPlacements, setAllPlacements] = useState<Placement[]>([]);
   const [filters, setFilters] = useState<FiltersState>(() => createEmptyFilters());
@@ -377,12 +377,12 @@ export const usePlacements = () => {
     typeFilterOptions,
   ]);
 
-  const wishlistPlacements = useMemo(
+  const addedPlacements = useMemo(
     () =>
-      wishlist
+      added
         .map((id) => placementsById.get(id))
         .filter((placement): placement is Placement => Boolean(placement)),
-    [wishlist, placementsById],
+    [added, placementsById],
   );
 
   const appliedPlacements = useMemo(
@@ -398,46 +398,46 @@ export const usePlacements = () => {
     [appliedPlacements],
   );
 
-  const selectedWishlistHomeCount = useMemo(
-    () => selectedWishlist.reduce((count, id) => count + (placementsById.get(id)?.homeArea ? 1 : 0), 0),
-    [selectedWishlist, placementsById],
+  const selectedAddedHomeCount = useMemo(
+    () => selectedAdded.reduce((count, id) => count + (placementsById.get(id)?.homeArea ? 1 : 0), 0),
+    [selectedAdded, placementsById],
   );
 
   const homeRequirementMet = homeApplicationsCount >= HOME_AREA_REQUIREMENT;
   const homeRequirementSatisfiedAfterSelection =
-    homeRequirementMet || homeApplicationsCount + selectedWishlistHomeCount >= HOME_AREA_REQUIREMENT;
+    homeRequirementMet || homeApplicationsCount + selectedAddedHomeCount >= HOME_AREA_REQUIREMENT;
   const homeRequirementBlocking = !homeRequirementSatisfiedAfterSelection;
   const homeRequirementDisplayCount = Math.min(
-    homeApplicationsCount + selectedWishlistHomeCount,
+    homeApplicationsCount + selectedAddedHomeCount,
     HOME_AREA_REQUIREMENT,
   );
   const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_AREA_REQUIREMENT}`;
 
-  const toggleWishlist = useCallback(
+  const toggleAdded = useCallback(
     (id: number) => {
-      const isCurrentlyWishlist = wishlist.includes(id);
-      if (!isCurrentlyWishlist && applications.includes(id)) {
+      const isCurrentlyAdded = added.includes(id);
+      if (!isCurrentlyAdded && applications.includes(id)) {
         showNotification('Already applied', 'This placement is already in your Applied tab');
         return;
       }
-      toggleWishlistState(id);
+      toggleAddedState(id);
       showNotification(
-        isCurrentlyWishlist ? 'Removed from wishlist' : 'Added to wishlist',
-        isCurrentlyWishlist ? '' : 'Check the box to select it for application',
+        isCurrentlyAdded ? 'Removed from Added list' : 'Added to Added list',
+        isCurrentlyAdded ? '' : 'Check the box to select it for application',
       );
     },
-    [applications, wishlist, toggleWishlistState, showNotification],
+    [applications, added, toggleAddedState, showNotification],
   );
 
-  const removeWishlist = useCallback(
+  const removeAdded = useCallback(
     (id: number) => {
-      if (!wishlist.includes(id)) {
+      if (!added.includes(id)) {
         return;
       }
-      removeWishlistState(id);
-      showNotification('Removed from wishlist', '');
+      removeAddedState(id);
+      showNotification('Removed from Added list', '');
     },
-    [wishlist, removeWishlistState, showNotification],
+    [added, removeAddedState, showNotification],
   );
 
   const openModal = useCallback((id: number) => {
@@ -459,17 +459,17 @@ export const usePlacements = () => {
           return prev;
         }
 
-        removeWishlistItems([id]);
+        removeAddedItems([id]);
         showNotification('Application submitted!', 'You will be notified when reviewed');
         return [...prev, id];
       });
     },
-    [removeWishlistItems, showNotification],
+    [removeAddedItems, showNotification],
   );
 
   const applyToSelected = useCallback(() => {
-    if (selectedWishlist.length === 0) {
-      showNotification('No wishlist selected', 'Use the Select buttons to pick wishlist placements');
+    if (selectedAdded.length === 0) {
+      showNotification('No added placements selected', 'Use the Select buttons to pick added placements');
       return;
     }
 
@@ -488,11 +488,11 @@ export const usePlacements = () => {
       }
 
       const remainingSlots = APPLICATION_LIMIT - prev.length;
-      const alreadyAppliedSelections = selectedWishlist.filter((id) => prev.includes(id));
-      const pendingSelections = selectedWishlist.filter((id) => !prev.includes(id));
+      const alreadyAppliedSelections = selectedAdded.filter((id) => prev.includes(id));
+      const pendingSelections = selectedAdded.filter((id) => !prev.includes(id));
 
       if (alreadyAppliedSelections.length > 0) {
-        removeWishlistItems(alreadyAppliedSelections);
+        removeAddedItems(alreadyAppliedSelections);
       }
 
       if (pendingSelections.length === 0) {
@@ -507,11 +507,11 @@ export const usePlacements = () => {
         return prev;
       }
 
-      removeWishlistItems(toApply);
+      removeAddedItems(toApply);
       showNotification(`Applied to ${toApply.length} placements!`, 'Check "Applied" tab to see them');
       return [...prev, ...toApply];
     });
-  }, [homeRequirementSatisfiedAfterSelection, removeWishlistItems, selectedWishlist, showNotification]);
+  }, [homeRequirementSatisfiedAfterSelection, removeAddedItems, selectedAdded, showNotification]);
 
   const withdrawApplication = useCallback(
     (id: number) => {
@@ -565,28 +565,28 @@ export const usePlacements = () => {
   const progressPercentage = Math.min(100, (applications.length / APPLICATION_LIMIT) * 100);
   const canApplyMore = applications.length < APPLICATION_LIMIT;
   const progressComplete = !canApplyMore;
-  const applyButtonLabel = `Apply to Selected (${selectedWishlist.length})`;
-  const applyButtonDisabled = selectedWishlist.length === 0 || !canApplyMore;
+  const applyButtonLabel = `Apply to Selected (${selectedAdded.length})`;
+  const applyButtonDisabled = selectedAdded.length === 0 || !canApplyMore;
   const resultsLabel = `Showing ${sortedPlacements.length} ${sortedPlacements.length === 1 ? 'placement' : 'placements'}`;
 
   return {
     placements: sortedPlacements,
-    wishlist,
-    wishlistPlacements,
+    added,
+    addedPlacements,
     applications,
     appliedPlacements,
-    selectedWishlist,
+    selectedAdded,
     activeTab,
     setActiveTab,
     notification,
     exitingNotification,
     notificationVisible: isNotificationVisible,
     clearNotification,
-    toggleWishlist,
-    toggleWishlistSelection,
-    selectAllWishlist,
-    deselectAllWishlist,
-    removeWishlist,
+    toggleAdded,
+    toggleAddedSelection,
+    selectAllAdded,
+    deselectAllAdded,
+    removeAdded,
     applyToPlacement,
     applyToSelected,
     withdrawApplication,
@@ -610,7 +610,7 @@ export const usePlacements = () => {
       ready: !homeRequirementBlocking,
     },
     resultsLabel,
-    wishlistCount: wishlist.length,
+    addedCount: added.length,
     applicationsCount: applications.length,
     applyButtonLabel,
     applyButtonDisabled,

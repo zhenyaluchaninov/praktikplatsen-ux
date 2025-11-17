@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-export type MobileView = 'explore' | 'wishlist' | 'applied';
+export type MobileView = 'explore' | 'added' | 'applied';
 
 type MobileViewBarProps = {
   activeView: MobileView;
@@ -17,7 +17,7 @@ const MobileExploreIcon = (): ReactElement => (
   </svg>
 );
 
-const MobileWishlistIcon = (): ReactElement => (
+const MobileAddedIcon = (): ReactElement => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.8 5.1a5 5 0 0 0-7.2 0L12 6.8l-1.6-1.7a5 5 0 0 0-7.2 7l1.6 1.7L12 21l7.2-7.2 1.6-1.7a5 5 0 0 0 0-7z" />
   </svg>
@@ -38,7 +38,7 @@ const BUTTONS: Array<{
   Icon: () => ReactElement;
 }> = [
   { id: 'applied', label: 'Applied', Icon: MobileAppliedIcon },
-  { id: 'wishlist', label: 'Wishlist', Icon: MobileWishlistIcon },
+  { id: 'added', label: 'Added', Icon: MobileAddedIcon },
   { id: 'explore', label: 'Explore', Icon: MobileExploreIcon },
 ];
 

@@ -389,7 +389,7 @@
         }
 
         @media (hover: hover) and (pointer: fine) {
-            .icon-btn:not(.wishlisted):hover .heart-icon {
+            .icon-btn:not(.added):hover .heart-icon {
                 color: #FF9933;
             }
         }
@@ -404,7 +404,7 @@
             }
         }
 
-        .icon-btn.wishlisted .heart-icon {
+        .icon-btn.added .heart-icon {
             color: #FF9933;
         }
 
