@@ -271,6 +271,10 @@
                 margin 0.3s ease, padding 0.3s ease;
         }
 
+        .home-requirement-banner--shake {
+            animation: applyBannerShake 0.6s ease;
+        }
+
         .home-requirement-banner.met {
             background: #E8F5E9;
             color: #80ad84;
@@ -501,6 +505,10 @@
             margin-top: 8px;
         }
 
+        .saved-panel__apply-banner {
+            margin-bottom: 10px;
+        }
+
         .saved-panel__footer .btn-submit-all {
             width: 100%;
         }
@@ -517,19 +525,30 @@
         }
 
         .saved-panels__mobile-submit {
-            margin-top: 20px;
-            padding: 0 10px;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 0 16px calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.95) 50%, #fff 100%);
+            z-index: 115;
+        }
+
+        .saved-panels__mobile-submit > * {
+            pointer-events: auto;
         }
 
         .saved-panels--mobile .btn-submit-all {
-            position: fixed;
-            left: 16px;
-            right: 16px;
-            bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
-            width: auto;
-            max-width: calc(100vw - 32px);
-            margin: 0 auto;
-            z-index: 115;
+            width: 100%;
+            margin-top: 0;
+        }
+
+        .saved-panels__mobile-submit .btn-submit-all {
+            margin-top: 0;
         }
 
         .btn-submit-all {
@@ -579,4 +598,24 @@
             transform: translateY(-1px);
         }
 
+        @keyframes applyBannerShake {
+            0% {
+                transform: translateX(0) rotate(0deg);
+            }
+            20% {
+                transform: translateX(-6px) rotate(-1deg);
+            }
+            40% {
+                transform: translateX(6px) rotate(1deg);
+            }
+            60% {
+                transform: translateX(-3px) rotate(-0.5deg);
+            }
+            80% {
+                transform: translateX(3px) rotate(0.5deg);
+            }
+            100% {
+                transform: translateX(0) rotate(0deg);
+            }
+        }
 

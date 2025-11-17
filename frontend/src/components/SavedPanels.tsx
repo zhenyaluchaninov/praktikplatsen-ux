@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import type { Placement } from '../types/placement';
@@ -81,6 +81,8 @@ export const SavedPanels = ({
   mobileMode = false,
 }: SavedPanelsProps) => {
   const [requirementBannerVisible, setRequirementBannerVisible] = useState(!homeRequirement.ready);
+  const [bannerShake, setBannerShake] = useState(false);
+  const bannerShakeTimeout = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
   useEffect(() => {
     if (!homeRequirement.ready) {
@@ -95,13 +97,41 @@ export const SavedPanels = ({
     };
   }, [homeRequirement.ready]);
 
+  useEffect(
+    () => () => {
+      if (bannerShakeTimeout.current) {
+        window.clearTimeout(bannerShakeTimeout.current);
+      }
+    },
+    [],
+  );
+
   const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
-  const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
-  
+  const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : '', bannerShake ? 'home-requirement-banner--shake' : '']
+    .filter(Boolean)
+    .join(' ');
+  const bannerButtonSpacing = mobileMode ? -15 : -15; 
+  const bannerContentPadding = mobileMode ? '8px 12px' : '8px 16px';
+
+  const triggerBannerAttention = useCallback(() => {
+    setRequirementBannerVisible(true);
+    setBannerShake(true);
+    if (bannerShakeTimeout.current) {
+      window.clearTimeout(bannerShakeTimeout.current);
+    }
+    bannerShakeTimeout.current = window.setTimeout(() => {
+      setBannerShake(false);
+    }, 600);
+  }, []);
+
   const handleApplyClick = useCallback(() => {
+    if (!homeRequirement.ready) {
+      triggerBannerAttention();
+      return;
+    }
     onApplyToSelected();
-  }, [onApplyToSelected]);
+  }, [homeRequirement.ready, onApplyToSelected, triggerBannerAttention]);
 
   const activeHeading = heading ?? (activeTab === 'added' ? 'Added' : 'Applied');
   const activeHeadingCount = activeTab === 'added' ? addedCount : applicationsCount;
@@ -130,11 +160,11 @@ export const SavedPanels = ({
     <div
       className="saved-panel__apply-banner"
       style={{
-        marginBottom: `${-15}px`,
+        marginBottom: `${bannerButtonSpacing}px`,
       }}
     >
       <Tooltip content={homeRequirement.tooltip}>
-        <div className={bannerClasses} style={{ overflow: 'visible', padding: '8px 16px' }}>
+        <div className={bannerClasses} style={{ overflow: 'visible', padding: bannerContentPadding }}>
           <span className="home-requirement-banner-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -155,22 +185,16 @@ export const SavedPanels = ({
     </>
   );
 
-  const submitWrapperStyle = mobileMode
-    ? {
-        overflow: 'visible',
-        paddingLeft: '10px',
-        paddingRight: '10px',
-      }
-    : {
-        overflow: 'visible',
-        padding: '0 14px',
-      };
+  const desktopSubmitWrapperStyle = {
+    overflow: 'visible',
+    padding: '0 14px',
+  };
   const submitSection = mobileMode ? (
-    <div className="saved-panels__mobile-submit" style={submitWrapperStyle}>
+    <div className="saved-panels__mobile-submit">
       {submitContent}
     </div>
   ) : (
-    <div className="saved-panel__footer" style={submitWrapperStyle}>
+    <div className="saved-panel__footer" style={desktopSubmitWrapperStyle}>
       {submitContent}
     </div>
   );
