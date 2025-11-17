@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+export type NotificationVariant = 'success' | 'info' | 'warning' | 'error';
+
 export interface NotificationPayload {
   id: number;
   title: string;
   message: string;
+  variant: NotificationVariant;
 }
 
 const DISPLAY_DURATION = 3000;
@@ -31,11 +34,12 @@ export const useNotifications = () => {
   }, []);
 
   const showNotification = useCallback(
-    (title: string, message: string) => {
+    (title: string, message: string, variant: NotificationVariant = 'success') => {
       const nextNotification: NotificationPayload = {
         id: Date.now(),
         title,
         message,
+        variant,
       };
 
       setNotification((prev) => {

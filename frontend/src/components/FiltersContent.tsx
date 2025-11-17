@@ -21,6 +21,9 @@ export type FiltersContentProps = {
   onSearchChange: (value: string) => void;
   onToggleFilter: (groupId: FilterGroupId, optionId: string) => void;
   onClearFilters: () => void;
+  wishlistOnly: boolean;
+  wishlistCount: number;
+  onToggleWishlistOnly: () => void;
   showSearchInput?: boolean;
   showHeader?: boolean;
 };
@@ -64,10 +67,14 @@ export const FiltersContent = ({
   onSearchChange,
   onToggleFilter,
   onClearFilters,
+  wishlistOnly,
+  wishlistCount,
+  onToggleWishlistOnly,
   showSearchInput = true,
   showHeader = true,
 }: FiltersContentProps) => {
   const [collapsedGroups, setCollapsedGroups] = useState<Partial<Record<FilterGroupId, boolean>>>({});
+  const [wishlistCollapsed, setWishlistCollapsed] = useState(false);
 
   useEffect(() => {
     setCollapsedGroups((prev) => {
@@ -114,6 +121,42 @@ export const FiltersContent = ({
           onChange={(event) => onSearchChange(event.target.value)}
         />
       )}
+
+      <div className="filter-group">
+        <button
+          type="button"
+          className="filter-label-button"
+          onClick={() => setWishlistCollapsed((prev) => !prev)}
+          aria-expanded={!wishlistCollapsed}
+          aria-controls="filter-options-wishlist"
+        >
+          <span className={`filter-chevron ${wishlistCollapsed ? 'collapsed' : ''}`} aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <span className="filter-label-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </span>
+          <span className="filter-label-text">Wishlist</span>
+        </button>
+        {!wishlistCollapsed && (
+          <div className="filter-options" id="filter-options-wishlist">
+            <div className="filter-option">
+              <input
+                type="checkbox"
+                id="wishlist-filter-option"
+                checked={wishlistOnly}
+                onChange={onToggleWishlistOnly}
+              />
+              <label htmlFor="wishlist-filter-option">Favorites only</label>
+              <span className="filter-count">{wishlistCount}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {groups.map((group) => {
         const isCollapsed = collapsedGroups[group.id] ?? false;

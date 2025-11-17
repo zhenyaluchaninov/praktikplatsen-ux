@@ -9,6 +9,9 @@ export const FiltersSidebar = ({
   onSearchChange,
   onToggleFilter,
   onClearFilters,
+  wishlistOnly,
+  wishlistCount,
+  onToggleWishlistOnly,
 }: FiltersSidebarProps) => (
   <aside className="filters-sidebar" aria-label="Filters">
     <FiltersContent
@@ -17,6 +20,9 @@ export const FiltersSidebar = ({
       onSearchChange={onSearchChange}
       onToggleFilter={onToggleFilter}
       onClearFilters={onClearFilters}
+      wishlistOnly={wishlistOnly}
+      wishlistCount={wishlistCount}
+      onToggleWishlistOnly={onToggleWishlistOnly}
     />
   </aside>
 );

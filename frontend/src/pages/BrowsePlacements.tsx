@@ -19,8 +19,10 @@ const BrowsePlacements = () => {
   const {
     placements,
     wishlist,
-    wishlistPlacements,
-    selectedWishlist,
+    wishlistOnly,
+    added,
+    applications,
+    addedPlacements,
     appliedPlacements,
     activeTab,
     setActiveTab,
@@ -29,10 +31,9 @@ const BrowsePlacements = () => {
     notificationVisible,
     clearNotification,
     toggleWishlist,
-    toggleWishlistSelection,
-    selectAllWishlist,
-    deselectAllWishlist,
-    removeWishlist,
+    toggleWishlistOnly,
+    toggleAdded,
+    removeAdded,
     applyToSelected,
     withdrawApplication,
     modalPlacement,
@@ -43,6 +44,7 @@ const BrowsePlacements = () => {
     progress,
     resultsLabel,
     wishlistCount,
+    addedCount,
     applicationsCount,
     applyButtonLabel,
     applyButtonDisabled,
@@ -126,8 +128,8 @@ const BrowsePlacements = () => {
       filterGroups.reduce(
         (count, group) => count + group.options.reduce((groupCount, option) => groupCount + (option.checked ? 1 : 0), 0),
         0,
-      ),
-    [filterGroups],
+      ) + (wishlistOnly ? 1 : 0),
+    [filterGroups, wishlistOnly],
   );
 
   const enterMobileSearch = () => {
@@ -178,8 +180,8 @@ const BrowsePlacements = () => {
       if (!isMobile) {
         return;
       }
-      if (view === 'wishlist' && activeTab !== 'wishlist') {
-        setActiveTab('wishlist');
+      if (view === 'added' && activeTab !== 'added') {
+        setActiveTab('added');
       } else if (view === 'applied' && activeTab !== 'applications') {
         setActiveTab('applications');
       }
@@ -266,13 +268,19 @@ const BrowsePlacements = () => {
               onSearchChange={onSearchChange}
               onToggleFilter={onToggleFilter}
               onClearFilters={onClearFilters}
+              wishlistOnly={wishlistOnly}
+              wishlistCount={wishlistCount}
+              onToggleWishlistOnly={toggleWishlistOnly}
             />
           )}
           {showPlacementsGrid && (
             <PlacementsGrid
               placements={placements}
               wishlist={wishlist}
+              added={added}
+              applications={applications}
               onToggleWishlist={toggleWishlist}
+              onToggleAdded={toggleAdded}
               onShowDetails={openModal}
               resultsLabel={resultsLabel}
               sortOption={sortOption}
@@ -311,6 +319,9 @@ const BrowsePlacements = () => {
                   onSearchChange={onSearchChange}
                   onToggleFilter={onToggleFilter}
                   onClearFilters={onClearFilters}
+                  wishlistOnly={wishlistOnly}
+                  wishlistCount={wishlistCount}
+                  onToggleWishlistOnly={toggleWishlistOnly}
                   showHeader={false}
                   showSearchInput={false}
                 />
@@ -320,20 +331,16 @@ const BrowsePlacements = () => {
           {isMobile && mobileView !== 'explore' && (
             <section
               className={`mobile-saved-panels mobile-saved-panels--${mobileView}`}
-              aria-label={mobileView === 'wishlist' ? 'Wishlist' : 'Applied'}
+              aria-label={mobileView === 'added' ? 'Added' : 'Applied'}
             >
               <SavedPanels
                 activeTab={activeTab}
-                wishlistCount={wishlistCount}
+                addedCount={addedCount}
                 applicationsCount={applicationsCount}
-                wishlistPlacements={wishlistPlacements}
+                addedPlacements={addedPlacements}
                 appliedPlacements={appliedPlacements}
-                selectedWishlist={selectedWishlist}
                 onTabChange={setActiveTab}
-                onToggleWishlistSelection={toggleWishlistSelection}
-                onSelectAllWishlist={selectAllWishlist}
-                onDeselectAllWishlist={deselectAllWishlist}
-                onRemoveWishlist={removeWishlist}
+                onRemoveAdded={removeAdded}
                 onApplyToSelected={applyToSelected}
                 onWithdrawApplication={withdrawApplication}
                 onShowInfo={openModal}
@@ -347,21 +354,17 @@ const BrowsePlacements = () => {
             </section>
           )}
           {!isMobile && (
-            <RightSidebar
-              activeTab={activeTab}
-              wishlistCount={wishlistCount}
-              applicationsCount={applicationsCount}
-              wishlistPlacements={wishlistPlacements}
-              appliedPlacements={appliedPlacements}
-              selectedWishlist={selectedWishlist}
-              onTabChange={setActiveTab}
-              onToggleWishlistSelection={toggleWishlistSelection}
-              onSelectAllWishlist={selectAllWishlist}
-              onDeselectAllWishlist={deselectAllWishlist}
-              onRemoveWishlist={removeWishlist}
-              onApplyToSelected={applyToSelected}
-              onWithdrawApplication={withdrawApplication}
-              onShowInfo={openModal}
+              <RightSidebar
+                activeTab={activeTab}
+                addedCount={addedCount}
+                applicationsCount={applicationsCount}
+                addedPlacements={addedPlacements}
+                appliedPlacements={appliedPlacements}
+                onTabChange={setActiveTab}
+                onRemoveAdded={removeAdded}
+                onApplyToSelected={applyToSelected}
+                onWithdrawApplication={withdrawApplication}
+                onShowInfo={openModal}
               applyButtonLabel={applyButtonLabel}
               applyButtonDisabled={applyButtonDisabled}
               homeRequirement={homeRequirement}
@@ -374,6 +377,7 @@ const BrowsePlacements = () => {
             key={`exiting-${exitingNotification.id}`}
             title={exitingNotification.title}
             message={exitingNotification.message}
+            variant={exitingNotification.variant}
             onClose={clearNotification}
             visible={false}
           />
@@ -383,6 +387,7 @@ const BrowsePlacements = () => {
             key={notification.id}
             title={notification.title}
             message={notification.message}
+            variant={notification.variant}
             onClose={clearNotification}
             visible={notificationVisible}
           />
@@ -396,7 +401,7 @@ const BrowsePlacements = () => {
           onChange={handleMobileViewChange}
           counts={{
             explore: placements.length,
-            wishlist: wishlistCount,
+            added: addedCount,
             applied: applicationsCount,
           }}
         />
