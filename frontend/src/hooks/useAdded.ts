@@ -33,6 +33,16 @@ export const useAdded = (initialAdded: number[] = []) => {
     setSelectedAdded([]);
   }, []);
 
+  const ensureAddedItem = useCallback((id: number) => {
+    setAdded((prev) => {
+      if (prev.includes(id)) {
+        return prev;
+      }
+      return [...prev, id];
+    });
+    setSelectedAdded((prev) => prev.filter((fav) => fav !== id));
+  }, []);
+
   const removeAddedItem = useCallback((id: number) => {
     setAdded((prev) => prev.filter((fav) => fav !== id));
     setSelectedAdded((prev) => prev.filter((fav) => fav !== id));
@@ -50,6 +60,7 @@ export const useAdded = (initialAdded: number[] = []) => {
     toggleAddedSelection,
     selectAllAdded,
     deselectAllAdded,
+    ensureAddedItem,
     removeAddedItem,
     removeAddedItems,
   };

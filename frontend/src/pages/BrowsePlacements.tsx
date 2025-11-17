@@ -21,6 +21,7 @@ const BrowsePlacements = () => {
     wishlist,
     wishlistOnly,
     added,
+    applications,
     addedPlacements,
     selectedAdded,
     appliedPlacements,
@@ -281,6 +282,7 @@ const BrowsePlacements = () => {
               placements={placements}
               wishlist={wishlist}
               added={added}
+              applications={applications}
               onToggleWishlist={toggleWishlist}
               onToggleAdded={toggleAdded}
               onShowDetails={openModal}

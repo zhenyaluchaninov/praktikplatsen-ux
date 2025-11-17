@@ -201,11 +201,9 @@ export const SavedPanels = ({
   const panelClassName = ['saved-panels', mobileMode ? 'saved-panels--mobile' : ''].filter(Boolean).join(' ');
   const addedTabDisplay = activeTab === 'added' ? (mobileMode ? 'block' : 'flex') : 'none';
   const applicationsTabDisplay = activeTab === 'applications' ? (mobileMode ? 'block' : 'flex') : 'none';
-  const buttonClasses = [
-    'btn-submit-all',
-    homeRequirement.ready ? 'btn-submit-all--ready' : 'btn-submit-all--neutral',
-    requirementHintActive ? 'btn-submit-all--attention' : '',
-  ]
+  const buttonStateClass =
+    applyButtonDisabled || !homeRequirement.ready ? 'btn-submit-all--neutral' : 'btn-submit-all--ready';
+  const buttonClasses = ['btn-submit-all', buttonStateClass, requirementHintActive ? 'btn-submit-all--attention' : '']
     .filter(Boolean)
     .join(' ');
 
@@ -217,6 +215,7 @@ export const SavedPanels = ({
       id="applyAllBtn"
       onClick={handleApplyClick}
       aria-disabled={applyButtonDisabled}
+      disabled={applyButtonDisabled}
     >
       {applyButtonLabel}
     </button>

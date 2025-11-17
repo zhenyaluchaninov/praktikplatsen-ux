@@ -594,6 +594,27 @@
             background: #D8F0DC;
         }
 
+        .btn-add--applied {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: #fff;
+            cursor: default;
+        }
+
+        .btn-add--applied svg {
+            stroke: #fff;
+        }
+
+        .btn-add--applied:hover {
+            background: #2E7D32;
+            border-color: #256526;
+            color: #fff;
+        }
+
+        .btn-add--applied:disabled {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .results-header {
                 width: 100%;

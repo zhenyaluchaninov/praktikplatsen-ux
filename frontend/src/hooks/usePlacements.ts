@@ -200,6 +200,7 @@ export const usePlacements = () => {
     deselectAllAdded,
     removeAddedItem: removeAddedState,
     removeAddedItems,
+    ensureAddedItem,
   } = useAdded(INITIAL_ADDED);
 
   const { notification, exitingNotification, isNotificationVisible, showNotification, clearNotification } = useNotifications();
@@ -540,11 +541,12 @@ export const usePlacements = () => {
         if (!prev.includes(id)) {
           return prev;
         }
-        showNotification('Application withdrawn', 'You can apply again if needed');
+        ensureAddedItem(id);
+        showNotification('Application withdrawn', 'Moved back to your Added list');
         return prev.filter((appId) => appId !== id);
       });
     },
-    [showNotification],
+    [ensureAddedItem, showNotification],
   );
 
   const toggleFilterOption = useCallback((groupId: FilterGroupId, optionId: string) => {
