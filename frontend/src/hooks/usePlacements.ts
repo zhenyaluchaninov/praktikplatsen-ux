@@ -205,6 +205,8 @@ export const usePlacements = () => {
   const { notification, exitingNotification, isNotificationVisible, showNotification, clearNotification } = useNotifications();
 
   const [applications, setApplications] = useState<number[]>(INITIAL_APPLICATIONS);
+  const [wishlist, setWishlist] = useState<number[]>([]);
+  const [wishlistOnly, setWishlistOnly] = useState(false);
   const [activeTab, setActiveTab] = useState<'added' | 'applications'>('added');
   const [modalPlacementId, setModalPlacementId] = useState<number | null>(null);
   const [allPlacements, setAllPlacements] = useState<Placement[]>([]);
@@ -256,9 +258,16 @@ export const usePlacements = () => {
     [allPlacements],
   );
 
+  const wishlistSet = useMemo(() => new Set(wishlist), [wishlist]);
+
+  const sourcePlacements = useMemo(
+    () => (wishlistOnly ? allPlacements.filter((placement) => wishlistSet.has(placement.id)) : allPlacements),
+    [allPlacements, wishlistOnly, wishlistSet],
+  );
+
   const placementsMatchingSearch = useMemo(
-    () => allPlacements.filter((placement) => matchesSearch(placement, searchValue)),
-    [allPlacements, searchValue],
+    () => sourcePlacements.filter((placement) => matchesSearch(placement, searchValue)),
+    [sourcePlacements, searchValue],
   );
 
   const placementsMatchingPerGroup = useMemo<Record<FilterGroupId, Placement[]>>(
@@ -412,6 +421,14 @@ export const usePlacements = () => {
     HOME_AREA_REQUIREMENT,
   );
   const homeRequirementDisplay = `${homeRequirementDisplayCount}/${HOME_AREA_REQUIREMENT}`;
+
+  const toggleWishlist = useCallback((id: number) => {
+    setWishlist((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  }, []);
+
+  const toggleWishlistOnly = useCallback(() => {
+    setWishlistOnly((prev) => !prev);
+  }, []);
 
   const toggleAdded = useCallback(
     (id: number) => {
@@ -571,6 +588,8 @@ export const usePlacements = () => {
 
   return {
     placements: sortedPlacements,
+    wishlist,
+    wishlistOnly,
     added,
     addedPlacements,
     applications,
@@ -582,6 +601,8 @@ export const usePlacements = () => {
     exitingNotification,
     notificationVisible: isNotificationVisible,
     clearNotification,
+    toggleWishlist,
+    toggleWishlistOnly,
     toggleAdded,
     toggleAddedSelection,
     selectAllAdded,
@@ -610,6 +631,7 @@ export const usePlacements = () => {
       ready: !homeRequirementBlocking,
     },
     resultsLabel,
+    wishlistCount: wishlist.length,
     addedCount: added.length,
     applicationsCount: applications.length,
     applyButtonLabel,

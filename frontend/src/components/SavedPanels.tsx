@@ -53,11 +53,13 @@ const EmptyAddedState = () => (
   <div className="empty-state">
     <div className="empty-state-icon">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
       </svg>
     </div>
     <p>Nothing added yet</p>
-    <p style={{ fontSize: '12px', marginTop: '8px' }}>Click the heart icon on placements to add them here</p>
+    <p style={{ fontSize: '12px', marginTop: '8px' }}>Use the Add button on placements to collect them here</p>
   </div>
 );
 

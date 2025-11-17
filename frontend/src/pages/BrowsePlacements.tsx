@@ -18,6 +18,8 @@ type MobileExploreMode = 'list' | 'search' | 'filters';
 const BrowsePlacements = () => {
   const {
     placements,
+    wishlist,
+    wishlistOnly,
     added,
     addedPlacements,
     selectedAdded,
@@ -28,6 +30,8 @@ const BrowsePlacements = () => {
     exitingNotification,
     notificationVisible,
     clearNotification,
+    toggleWishlist,
+    toggleWishlistOnly,
     toggleAdded,
     toggleAddedSelection,
     selectAllAdded,
@@ -42,6 +46,7 @@ const BrowsePlacements = () => {
     closeCompletionModal,
     progress,
     resultsLabel,
+    wishlistCount,
     addedCount,
     applicationsCount,
     applyButtonLabel,
@@ -126,8 +131,8 @@ const BrowsePlacements = () => {
       filterGroups.reduce(
         (count, group) => count + group.options.reduce((groupCount, option) => groupCount + (option.checked ? 1 : 0), 0),
         0,
-      ),
-    [filterGroups],
+      ) + (wishlistOnly ? 1 : 0),
+    [filterGroups, wishlistOnly],
   );
 
   const enterMobileSearch = () => {
@@ -266,12 +271,17 @@ const BrowsePlacements = () => {
               onSearchChange={onSearchChange}
               onToggleFilter={onToggleFilter}
               onClearFilters={onClearFilters}
+              wishlistOnly={wishlistOnly}
+              wishlistCount={wishlistCount}
+              onToggleWishlistOnly={toggleWishlistOnly}
             />
           )}
           {showPlacementsGrid && (
             <PlacementsGrid
               placements={placements}
+              wishlist={wishlist}
               added={added}
+              onToggleWishlist={toggleWishlist}
               onToggleAdded={toggleAdded}
               onShowDetails={openModal}
               resultsLabel={resultsLabel}
@@ -311,6 +321,9 @@ const BrowsePlacements = () => {
                   onSearchChange={onSearchChange}
                   onToggleFilter={onToggleFilter}
                   onClearFilters={onClearFilters}
+                  wishlistOnly={wishlistOnly}
+                  wishlistCount={wishlistCount}
+                  onToggleWishlistOnly={toggleWishlistOnly}
                   showHeader={false}
                   showSearchInput={false}
                 />

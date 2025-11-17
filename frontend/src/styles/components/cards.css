@@ -533,6 +533,10 @@
 
         .btn-details {
             flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             padding: 6px 10px;
             background: white;
             color: #666;
@@ -548,6 +552,46 @@
             background: #f8f8f8;
             border-color: #999;
             color: #333;
+        }
+
+        .btn-add {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+        }
+
+        .btn-add svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .btn-add:hover {
+            background: #f8f8f8;
+            border-color: #999;
+            color: #333;
+        }
+
+        .btn-add--active {
+            border-color: #2E7D32;
+            color: #2E7D32;
+            background: #E8F5E9;
+        }
+
+        .btn-add--active:hover {
+            border-color: #256526;
+            color: #256526;
+            background: #D8F0DC;
         }
 
         @media (max-width: 768px) {

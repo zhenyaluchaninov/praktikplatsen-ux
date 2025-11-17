@@ -7,7 +7,9 @@ import { SortControl } from './SortControl';
 
 interface PlacementsGridProps {
   placements: Placement[];
+  wishlist: number[];
   added: number[];
+  onToggleWishlist: (id: number) => void;
   onToggleAdded: (id: number) => void;
   onShowDetails: (id: number) => void;
   resultsLabel: string;
@@ -45,7 +47,9 @@ const highlightMatch = (text: string, query: string): ReactNode => {
 
 export const PlacementsGrid = ({
   placements,
+  wishlist,
   added,
+  onToggleWishlist,
   onToggleAdded,
   onShowDetails,
   resultsLabel,
@@ -67,6 +71,7 @@ export const PlacementsGrid = ({
 
       <div className="cards-grid" id="cardsGrid">
         {placements.map((placement) => {
+          const isWishlisted = wishlist.includes(placement.id);
           const isAdded = added.includes(placement.id);
           return (
             <div className="placement-card" key={placement.id}>
@@ -81,14 +86,16 @@ export const PlacementsGrid = ({
                 <div className="card-actions">
                   <button
                     type="button"
-                    className={`icon-btn ${isAdded ? 'added' : ''}`}
-                    onClick={() => onToggleAdded(placement.id)}
-                    title={isAdded ? 'Remove from Added list' : 'Add to Added list'}
+                    className={`icon-btn ${isWishlisted ? 'added' : ''}`}
+                    onClick={() => onToggleWishlist(placement.id)}
+                    title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    aria-pressed={isWishlisted}
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                   >
                     <svg
                       className="heart-icon"
                       viewBox="0 0 24 24"
-                      fill={isAdded ? 'currentColor' : 'none'}
+                      fill={isWishlisted ? 'currentColor' : 'none'}
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
@@ -173,6 +180,26 @@ export const PlacementsGrid = ({
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                   </svg>
                   Info
+                </button>
+                <button
+                  type="button"
+                  className={`btn-add ${isAdded ? 'btn-add--active' : ''}`}
+                  onClick={() => onToggleAdded(placement.id)}
+                  aria-pressed={isAdded}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  {isAdded ? 'Added' : 'Add'}
                 </button>
               </div>
             </div>
