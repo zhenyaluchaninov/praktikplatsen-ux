@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
-import { easeInOut, motion, type Transition } from 'framer-motion';
 
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
@@ -65,8 +64,6 @@ const EmptyApplicationsState = () => (
   </div>
 );
 
-const REQUIREMENT_HINT_DURATION = 2000;
-
 export const SavedPanels = ({
   activeTab,
   addedCount,
@@ -86,60 +83,15 @@ export const SavedPanels = ({
   showMobileHeading = true,
   mobileMode = false,
 }: SavedPanelsProps) => {
-  const requirementHintTimeoutRef = useRef<number | null>(null);
-  const [hintVisible, setHintVisible] = useState(false);
-  const [hintKey, setHintKey] = useState(0);
-
   const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
   const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : ''].filter(Boolean).join(' ');
-  const bannerAnimation = hintVisible
-    ? { x: [0, -8, 8, -6, 6, -4, 4, 0], rotate: [0, -0.8, 0.8, -0.4, 0.4, -0.2, 0.2, 0] }
-    : { x: 0, rotate: 0 };
-  const bannerTransition: Transition = { duration: 0.6, ease: easeInOut };
-
-  const triggerRequirementHint = useCallback(() => {
-    if (requirementHintTimeoutRef.current) {
-      window.clearTimeout(requirementHintTimeoutRef.current);
-      requirementHintTimeoutRef.current = null;
-    }
-
-    setHintVisible(true);
-    setHintKey((prev) => prev + 1);
-
-    requirementHintTimeoutRef.current = window.setTimeout(() => {
-      setHintVisible(false);
-      requirementHintTimeoutRef.current = null;
-    }, REQUIREMENT_HINT_DURATION);
-  }, []);
-
-  useEffect(
-    () => () => {
-      if (requirementHintTimeoutRef.current) {
-        window.clearTimeout(requirementHintTimeoutRef.current);
-        requirementHintTimeoutRef.current = null;
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    if (!homeRequirement.blocking) {
-      if (requirementHintTimeoutRef.current) {
-        window.clearTimeout(requirementHintTimeoutRef.current);
-        requirementHintTimeoutRef.current = null;
-      }
-      setHintVisible(false);
-    }
-  }, [homeRequirement.blocking]);
+  const bannerButtonSpacing = mobileMode ? -15 : -15; // gap between the banner (2) and the apply button (1)
+  const bannerContentPadding = mobileMode ? '8px 12px' : '8px 16px'; // inner padding so the text doesn't hug the border
 
   const handleApplyClick = useCallback(() => {
-    if (homeRequirement.blocking) {
-      triggerRequirementHint();
-      return;
-    }
     onApplyToSelected();
-  }, [homeRequirement.blocking, onApplyToSelected, triggerRequirementHint]);
+  }, [onApplyToSelected]);
 
   const activeHeading = heading ?? (activeTab === 'added' ? 'Added' : 'Applied');
   const activeHeadingCount = activeTab === 'added' ? addedCount : applicationsCount;
@@ -168,17 +120,11 @@ export const SavedPanels = ({
     <div
       className="saved-panel__apply-banner"
       style={{
-        marginBottom: mobileMode ? '4px' : '6px',
+        marginBottom: `${bannerButtonSpacing}px`,
       }}
     >
       <Tooltip content={homeRequirement.tooltip}>
-        <motion.div
-          key={`banner-${hintKey}`}
-          className={bannerClasses}
-          animate={bannerAnimation}
-          transition={bannerTransition}
-          style={{ overflow: 'visible', padding: '0 12px' }}
-        >
+        <div className={bannerClasses} style={{ overflow: 'visible', padding: bannerContentPadding }}>
           <span className="home-requirement-banner-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -187,7 +133,7 @@ export const SavedPanels = ({
             </svg>
           </span>
           <span className="home-requirement-text">{homeRequirement.text}</span>
-        </motion.div>
+        </div>
       </Tooltip>
     </div>
   );
