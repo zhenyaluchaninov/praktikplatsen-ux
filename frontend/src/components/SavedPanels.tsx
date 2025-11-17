@@ -257,14 +257,33 @@ export const SavedPanels = ({
 
       <div id="addedTab" className="tab-content" style={{ display: addedTabDisplay }}>
         <div className="saved-panel__header">
+          <Tooltip content={homeRequirement.tooltip}>
+            <motion.div
+              key={bannerKey}
+              className={bannerClasses}
+              animate={bannerAnimation}
+              transition={bannerTransition}
+            >
+              <span className="home-requirement-banner-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </span>
+              <span className="home-requirement-text">{homeRequirement.text}</span>
+            </motion.div>
+          </Tooltip>
+
           <div
             className="saved-controls"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '12px',
+              marginTop: '12px',
               paddingBottom: '8px',
+              marginBottom: '12px',
               borderBottom: '1px solid #f0f0f0',
             }}
           >
@@ -300,24 +319,6 @@ export const SavedPanels = ({
               </button>
             </div>
           </div>
-
-          <Tooltip content={homeRequirement.tooltip}>
-            <motion.div
-              key={bannerKey}
-              className={bannerClasses}
-              animate={bannerAnimation}
-              transition={bannerTransition}
-            >
-              <span className="home-requirement-banner-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </span>
-              <span className="home-requirement-text">{homeRequirement.text}</span>
-            </motion.div>
-          </Tooltip>
         </div>
 
         <div className="saved-panel__scroll">
