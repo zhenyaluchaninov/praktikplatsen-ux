@@ -98,17 +98,21 @@ export const SavedPanels = ({
 
   const spinMotion = { rotate: [90, 370, 360] };
 
+  const easeOutCubic = [0.33, 1, 0.68, 1];
+  const easeInCubic = [0.42, 0, 1, 1];
+  const easeLinear = [0, 0, 1, 1];
+
   const jumpTransition = {
     y: {
       duration: 0.8,
-      ease: ['easeOut', 'linear', 'easeIn', 'easeOut', 'easeIn'],
+      ease: [easeOutCubic, easeLinear, easeInCubic, easeOutCubic, easeInCubic],
       times: [0, 0.22, 0.48, 0.78, 0.9, 1],
     },
-    scaleX: { duration: 0.3, ease: ['easeOut', 'linear', 'easeIn'], times: [0, 0.25, 0.5, 1] },
-    scaleY: { duration: 0.3, ease: ['easeOut', 'linear', 'easeIn'], times: [0, 0.25, 0.5, 1] },
+    scaleX: { duration: 0.3, ease: [easeOutCubic, easeLinear, easeInCubic], times: [0, 0.25, 0.5, 1] },
+    scaleY: { duration: 0.3, ease: [easeOutCubic, easeLinear, easeInCubic], times: [0, 0.25, 0.5, 1] },
   };
 
-  const spinTransition = { rotate: { duration: 0.8, ease: 'easeOut', times: [0, 0.5, 1] } };
+  const spinTransition = { rotate: { duration: 0.8, ease: easeOutCubic, times: [0, 0.5, 1] } };
 
   useEffect(() => {
     if (!homeRequirement.ready) {
