@@ -271,6 +271,14 @@
                 margin 0.3s ease, padding 0.3s ease;
         }
 
+        .home-requirement-banner--highlight {
+            background: #ff9f4d;
+            color: #ffffff;
+            border-color: #ff8a26;
+            box-shadow: 0 10px 30px rgba(255, 138, 38, 0.22);
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+        }
+
         .home-requirement-banner--shake {
             animation: applyBannerShake 0.6s ease;
         }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
+import { motion } from 'framer-motion';
 
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
@@ -81,8 +82,33 @@ export const SavedPanels = ({
   mobileMode = false,
 }: SavedPanelsProps) => {
   const [requirementBannerVisible, setRequirementBannerVisible] = useState(!homeRequirement.ready);
-  const [bannerShake, setBannerShake] = useState(false);
-  const bannerShakeTimeout = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const [failedApplyAttempts, setFailedApplyAttempts] = useState(0);
+  const [highlightActive, setHighlightActive] = useState(false);
+  const highlightTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  const shakeMotion = { x: [0, -8, 8, -4, 4, 0], rotate: [0, -2, 2, -1, 1, 0], scale: 1.02 };
+
+  // Jump arc and spin are controlled separately so they can be tuned independently
+  const jumpMotion = {
+    x: 0,
+    y: [0, -140, -155, 0, -30, 0],
+    scaleX: [1, 1.03, 1.02, 1],
+    scaleY: [1, 0.9, 0.96, 1],
+  };
+
+  const spinMotion = { rotate: [90, 370, 360] };
+
+  const jumpTransition = {
+    y: {
+      duration: 0.8,
+      ease: ['easeOut', 'linear', 'easeIn', 'easeOut', 'easeIn'],
+      times: [0, 0.22, 0.48, 0.78, 0.9, 1],
+    },
+    scaleX: { duration: 0.3, ease: ['easeOut', 'linear', 'easeIn'], times: [0, 0.25, 0.5, 1] },
+    scaleY: { duration: 0.3, ease: ['easeOut', 'linear', 'easeIn'], times: [0, 0.25, 0.5, 1] },
+  };
+
+  const spinTransition = { rotate: { duration: 0.8, ease: 'easeOut', times: [0, 0.5, 1] } };
 
   useEffect(() => {
     if (!homeRequirement.ready) {
@@ -97,10 +123,21 @@ export const SavedPanels = ({
     };
   }, [homeRequirement.ready]);
 
+  useEffect(() => {
+    if (homeRequirement.ready) {
+      setFailedApplyAttempts(0);
+      setHighlightActive(false);
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
+        highlightTimeoutRef.current = null;
+      }
+    }
+  }, [homeRequirement.ready]);
+
   useEffect(
     () => () => {
-      if (bannerShakeTimeout.current) {
-        window.clearTimeout(bannerShakeTimeout.current);
+      if (highlightTimeoutRef.current) {
+        window.clearTimeout(highlightTimeoutRef.current);
       }
     },
     [],
@@ -108,7 +145,12 @@ export const SavedPanels = ({
 
   const addedEmpty = addedPlacements.length === 0;
   const applicationsEmpty = appliedPlacements.length === 0;
-  const bannerClasses = ['home-requirement-banner', homeRequirement.ready ? 'met' : '', bannerShake ? 'home-requirement-banner--shake' : '']
+  const attentionLevel = failedApplyAttempts === 0 ? 0 : failedApplyAttempts % 2 === 1 ? 1 : 2;
+  const bannerClasses = [
+    'home-requirement-banner',
+    homeRequirement.ready ? 'met' : '',
+    attentionLevel === 1 && highlightActive ? 'home-requirement-banner--highlight' : '',
+  ]
     .filter(Boolean)
     .join(' ');
   const bannerButtonSpacing = mobileMode ? -15 : -15; 
@@ -116,13 +158,20 @@ export const SavedPanels = ({
 
   const triggerBannerAttention = useCallback(() => {
     setRequirementBannerVisible(true);
-    setBannerShake(true);
-    if (bannerShakeTimeout.current) {
-      window.clearTimeout(bannerShakeTimeout.current);
-    }
-    bannerShakeTimeout.current = window.setTimeout(() => {
-      setBannerShake(false);
-    }, 600);
+    setFailedApplyAttempts((prev) => {
+      const next = prev + 1;
+      if (next % 2 === 1) {
+        if (highlightTimeoutRef.current) {
+          window.clearTimeout(highlightTimeoutRef.current);
+        }
+        setHighlightActive(true);
+        highlightTimeoutRef.current = window.setTimeout(() => {
+          setHighlightActive(false);
+          highlightTimeoutRef.current = null;
+        }, 800);
+      }
+      return next;
+    });
   }, []);
 
   const handleApplyClick = useCallback(() => {
@@ -164,7 +213,26 @@ export const SavedPanels = ({
       }}
     >
       <Tooltip content={homeRequirement.tooltip}>
-        <div className={bannerClasses} style={{ overflow: 'visible', padding: bannerContentPadding }}>
+        <motion.div
+          key={failedApplyAttempts}
+          className={bannerClasses}
+          style={{ overflow: 'visible', padding: bannerContentPadding }}
+          initial={false}
+          animate={
+            attentionLevel === 0
+              ? { x: 0, y: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1 }
+              : attentionLevel === 1
+                ? shakeMotion
+                : { ...jumpMotion, ...spinMotion }
+          }
+          transition={
+            attentionLevel === 1
+              ? { duration: 0.6, ease: 'easeInOut' }
+              : attentionLevel === 2
+                ? { ...jumpTransition, ...spinTransition }
+                : { duration: 0.3 }
+          }
+        >
           <span className="home-requirement-banner-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -173,7 +241,7 @@ export const SavedPanels = ({
             </svg>
           </span>
           <span className="home-requirement-text">{homeRequirement.text}</span>
-        </div>
+        </motion.div>
       </Tooltip>
     </div>
   );
