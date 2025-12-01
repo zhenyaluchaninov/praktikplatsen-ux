@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
+import type { Transition } from 'framer-motion';
 
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
@@ -98,11 +99,11 @@ export const SavedPanels = ({
 
   const spinMotion = { rotate: [90, 370, 360] };
 
-  const easeOutCubic = [0.33, 1, 0.68, 1];
-  const easeInCubic = [0.42, 0, 1, 1];
-  const easeLinear = [0, 0, 1, 1];
+  const easeOutCubic: [number, number, number, number] = [0.33, 1, 0.68, 1];
+  const easeInCubic: [number, number, number, number] = [0.42, 0, 1, 1];
+  const easeLinear: [number, number, number, number] = [0, 0, 1, 1];
 
-  const jumpTransition = {
+  const jumpTransition: Transition = {
     y: {
       duration: 0.8,
       ease: [easeOutCubic, easeLinear, easeInCubic, easeOutCubic, easeInCubic],
@@ -112,7 +113,7 @@ export const SavedPanels = ({
     scaleY: { duration: 0.3, ease: [easeOutCubic, easeLinear, easeInCubic], times: [0, 0.25, 0.5, 1] },
   };
 
-  const spinTransition = { rotate: { duration: 0.8, ease: easeOutCubic, times: [0, 0.5, 1] } };
+  const spinTransition: Transition = { rotate: { duration: 0.8, ease: easeOutCubic, times: [0, 0.5, 1] } };
 
   useEffect(() => {
     if (!homeRequirement.ready) {
