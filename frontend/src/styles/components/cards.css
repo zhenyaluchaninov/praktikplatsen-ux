@@ -467,6 +467,97 @@
             stroke: #2a9d6d;
         }
 
+        .home-area-highlight {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            white-space: nowrap;
+        }
+
+        .home-area-highlight__label {
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+        }
+
+        .home-area-highlight__chip {
+            position: absolute;
+            inset: -4px -8px;
+            background: linear-gradient(135deg, #ffb066, #ff9933);
+            color: #fff;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: inherit;
+            font-weight: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 10px 24px rgba(255, 153, 51, 0.28);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+            transform-origin: center;
+            transform: scale(0.96);
+        }
+
+        .home-area-highlight__icon svg {
+            width: 12px;
+            height: 12px;
+            display: block;
+            stroke: currentColor;
+        }
+
+        .home-area-highlight__chip .home-area-highlight__icon svg {
+            stroke: #fff;
+        }
+
+        .meta-item.home-area .home-area-highlight__chip {
+            inset: -3px -6px;
+            padding: 3px 10px;
+        }
+
+        .saved-card__chip.home-area-highlight .home-area-highlight__chip {
+            inset: -2px -4px;
+            padding: 3px 10px;
+        }
+
+        .home-area-highlight__text {
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.01em;
+        }
+
+        .home-area-highlight--pulse .home-area-highlight__chip {
+            animation: areaChipGlow 2s ease-in-out 1 forwards;
+        }
+
+        @keyframes areaChipGlow {
+            0% {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            25% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            75% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+        }
+
         .card-footer {
             display: flex;
             gap: 6px;

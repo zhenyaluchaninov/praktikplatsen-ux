@@ -61,6 +61,8 @@ const BrowsePlacements = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileExploreMode, setMobileExploreMode] = useState<MobileExploreMode>('list');
   const [mobileView, setMobileView] = useState<MobileView>('explore');
+  const [homeAreaPulseKey, setHomeAreaPulseKey] = useState(0);
+  const homeAreaPulseTimeoutRef = useRef<number | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const stickyStackRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -123,6 +125,15 @@ const BrowsePlacements = () => {
     }
   }, [isMobileExplore]);
 
+  useEffect(
+    () => () => {
+      if (homeAreaPulseTimeoutRef.current) {
+        window.clearTimeout(homeAreaPulseTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
   const activeFiltersCount = useMemo(
     () =>
       filterGroups.reduce(
@@ -173,6 +184,16 @@ const BrowsePlacements = () => {
     searchInputRef.current?.blur();
     exitMobileSearch();
   };
+
+  const triggerHomeAreaPulse = useCallback(() => {
+    if (homeAreaPulseTimeoutRef.current) {
+      window.clearTimeout(homeAreaPulseTimeoutRef.current);
+    }
+    homeAreaPulseTimeoutRef.current = window.setTimeout(() => {
+      setHomeAreaPulseKey((prev) => prev + 1);
+      homeAreaPulseTimeoutRef.current = null;
+    }, 300);
+  }, []);
 
   const handleMobileViewChange = useCallback(
     (view: MobileView) => {
@@ -286,6 +307,7 @@ const BrowsePlacements = () => {
               sortOption={sortOption}
               onSortChange={onSortChange}
               searchValue={searchValue}
+              homeAreaPulseKey={homeAreaPulseKey}
             />
           )}
           {showMobileFiltersPanel && (
@@ -347,6 +369,8 @@ const BrowsePlacements = () => {
                 applyButtonLabel={applyButtonLabel}
                 applyButtonDisabled={applyButtonDisabled}
                 homeRequirement={homeRequirement}
+                onHomeRequirementAttention={triggerHomeAreaPulse}
+                homeAreaPulseKey={homeAreaPulseKey}
                 showTabs={false}
                 showMobileHeading={false}
                 mobileMode
@@ -368,6 +392,8 @@ const BrowsePlacements = () => {
               applyButtonLabel={applyButtonLabel}
               applyButtonDisabled={applyButtonDisabled}
               homeRequirement={homeRequirement}
+              onHomeRequirementAttention={triggerHomeAreaPulse}
+              homeAreaPulseKey={homeAreaPulseKey}
             />
           )}
         </div>

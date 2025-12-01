@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { SortOption } from '../hooks/usePlacements';
+import { usePulseFlag } from '../hooks/usePulseFlag';
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
 import { SortControl } from './SortControl';
@@ -17,6 +18,7 @@ interface PlacementsGridProps {
   sortOption: SortOption;
   onSortChange: (option: SortOption) => void;
   searchValue: string;
+  homeAreaPulseKey: number;
 }
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -58,7 +60,10 @@ export const PlacementsGrid = ({
   sortOption,
   onSortChange,
   searchValue,
+  homeAreaPulseKey,
 }: PlacementsGridProps) => {
+  const homeAreaPulseActive = usePulseFlag(homeAreaPulseKey, 2400);
+
   return (
     <main className="cards-section">
       <div className="results-header">
@@ -119,18 +124,40 @@ export const PlacementsGrid = ({
               <div className="card-meta">
                 {placement.homeArea ? (
                   <div className="meta-item home-area">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    <span>Your area</span>
+                    <span className={`home-area-highlight ${homeAreaPulseActive ? 'home-area-highlight--pulse' : ''}`}>
+                      <span className="home-area-highlight__label">
+                        <span className="home-area-highlight__icon" aria-hidden="true">
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                          </svg>
+                        </span>
+                        <span>Your area</span>
+                      </span>
+                      <span className="home-area-highlight__chip" aria-hidden="true">
+                        <span className="home-area-highlight__icon">
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                          </svg>
+                        </span>
+                        <span className="home-area-highlight__text">Your area</span>
+                      </span>
+                    </span>
                   </div>
                 ) : (
                   <>

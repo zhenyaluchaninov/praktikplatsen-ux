@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
 import type { Transition } from 'framer-motion';
 
+import { usePulseFlag } from '../hooks/usePulseFlag';
 import type { Placement } from '../types/placement';
 import { LogoImage } from './LogoImage';
 import { Tooltip } from './Tooltip';
@@ -27,6 +28,8 @@ export type SavedPanelsProps = {
   applyButtonLabel: string;
   applyButtonDisabled: boolean;
   homeRequirement: HomeRequirementState;
+  onHomeRequirementAttention?: () => void;
+  homeAreaPulseKey?: number;
   showTabs?: boolean;
   heading?: string;
   showMobileHeading?: boolean;
@@ -77,6 +80,8 @@ export const SavedPanels = ({
   applyButtonLabel,
   applyButtonDisabled,
   homeRequirement,
+  onHomeRequirementAttention,
+  homeAreaPulseKey = 0,
   showTabs = true,
   heading,
   showMobileHeading = true,
@@ -85,6 +90,7 @@ export const SavedPanels = ({
   const [requirementBannerVisible, setRequirementBannerVisible] = useState(!homeRequirement.ready);
   const [failedApplyAttempts, setFailedApplyAttempts] = useState(0);
   const [highlightActive, setHighlightActive] = useState(false);
+  const homeAreaPulseActive = usePulseFlag(homeAreaPulseKey, 2400);
   const highlightTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
   const shakeMotion = { x: [0, -8, 8, -4, 4, 0], rotate: [0, -2, 2, -1, 1, 0], scale: 1.02 };
@@ -188,10 +194,11 @@ export const SavedPanels = ({
   const handleApplyClick = useCallback(() => {
     if (!homeRequirement.ready) {
       triggerBannerAttention();
+      onHomeRequirementAttention?.();
       return;
     }
     onApplyToSelected();
-  }, [homeRequirement.ready, onApplyToSelected, triggerBannerAttention]);
+  }, [homeRequirement.ready, onApplyToSelected, onHomeRequirementAttention, triggerBannerAttention]);
 
   const activeHeading = heading ?? (activeTab === 'added' ? 'Added' : 'Applied');
   const activeHeadingCount = activeTab === 'added' ? addedCount : applicationsCount;
@@ -335,7 +342,12 @@ export const SavedPanels = ({
                         <div className="saved-card__meta">
                           {placement.homeArea && (
                             <>
-                              <span className="saved-card__chip">Your area</span>
+                              <span className={`saved-card__chip home-area-highlight ${homeAreaPulseActive ? 'home-area-highlight--pulse' : ''}`}>
+                                <span className="home-area-highlight__label">Your area</span>
+                                <span className="home-area-highlight__chip" aria-hidden="true">
+                                  <span className="home-area-highlight__text">Your area</span>
+                                </span>
+                              </span>
                               <span className="saved-card__meta-dot" aria-hidden="true"></span>
                             </>
                           )}
@@ -415,7 +427,12 @@ export const SavedPanels = ({
                         <div className="saved-card__meta">
                           {placement.homeArea && (
                             <>
-                              <span className="saved-card__chip">Your area</span>
+                              <span className={`saved-card__chip home-area-highlight ${homeAreaPulseActive ? 'home-area-highlight--pulse' : ''}`}>
+                                <span className="home-area-highlight__label">Your area</span>
+                                <span className="home-area-highlight__chip" aria-hidden="true">
+                                  <span className="home-area-highlight__text">Your area</span>
+                                </span>
+                              </span>
                               <span className="saved-card__meta-dot" aria-hidden="true"></span>
                             </>
                           )}
