@@ -165,6 +165,12 @@ export const SavedPanels = ({
     setRequirementBannerVisible(true);
     setFailedApplyAttempts((prev) => {
       const next = prev + 1;
+      const nextAttention = next === 0 ? 0 : next % 2 === 1 ? 1 : 2;
+      console.log('[SavedPanels] triggerBannerAttention', {
+        prevFailedAttempts: prev,
+        nextFailedAttempts: next,
+        attentionLevel: nextAttention,
+      });
       if (next % 2 === 1) {
         if (highlightTimeoutRef.current) {
           window.clearTimeout(highlightTimeoutRef.current);
@@ -219,10 +225,9 @@ export const SavedPanels = ({
     >
       <Tooltip content={homeRequirement.tooltip}>
         <motion.div
-          key={failedApplyAttempts}
           className={bannerClasses}
           style={{ overflow: 'visible', padding: bannerContentPadding }}
-          initial={false}
+          initial={{ x: 0, y: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1 }}
           animate={
             attentionLevel === 0
               ? { x: 0, y: 0, rotate: 0, scale: 1, scaleX: 1, scaleY: 1 }
